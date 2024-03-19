@@ -5,10 +5,11 @@ use app\api\model\ord\Category;
 use app\api\model\ord\Dishes;
 use app\api\model\ord\DishesFile;
 use app\api\model\ord\File;
+use app\api\service\BaseService;
 use think\Db;
 use think\Exception;
 
-class DishesService
+class DishesService extends BaseService
 {
     protected $dishesModel;
     protected $fileModel;
@@ -164,5 +165,16 @@ class DishesService
         }
 
         return false;
+    }
+
+    public function del(array $param)
+    {
+        $dishes = $this->dishesModel->find($param['ID']);
+        if (!$dishes) {
+            app_exception('请求参数异常');
+        }
+
+        return $dishes->delete();
+
     }
 }
