@@ -1,0 +1,10 @@
+/application/extra/site.php
+/application/admin/controller/Test.php
+/application/admin/view/test
+/.idea
+/runtime/cache
+/runtime/log
+/runtime/temp
+/public/uploads
+/runtime
+.env

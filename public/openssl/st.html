@@ -1,0 +1,46 @@
+<!DOCTYPE html> 
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+    <head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta content="always" name="referrer">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+    <script src="./jsencrypt.js"></script>
+   
+    <script type="text/javascript">
+        $(function () {
+            var encrypt = new JSEncrypt();
+            encrypt.setPublicKey($("#tra").val());//设置公有key
+            var data = encrypt.encrypt("罗源县中华失联飞机安抚拉斯加 大是的发生两地分居阿斯蒂芬");
+            
+            console.log('old:'+data);
+            
+            $("#btn").click(function () {
+                $.ajax({
+                    url: '/openssl/index.php',
+                    data: "password=" + encodeURI(data).replace(/\+/g, '%2B'),  //+号的处理：因为数据在网络上传输时，非字母数字字符都将被替换成百分号（%）后跟两位十六进制数，而base64编码在传输到后端的时候，+会变成空格，因此先替换掉。后端再替换回来
+                    type: 'post',
+                    success: function (msg) {
+                    console.log('new:'+msg);
+                    }
+                });
+            });
+
+        }); 
+    </script>
+</head>
+<body>
+    <div class="main">
+        <input type="button" id="btn" value="点我" />
+        <textarea id="tra" rows="15" cols="65">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC0Llg1bVZhnyslfezwfeOkvnXW
+q59bDtmQyHvxkP/38Fw8QQXBfROCgzGc+Te6pOPl6Ye+vQ1rAnisBaP3rMk40i3O
+pallzVkuwRKydek3V9ufPpZEEH4eBgInMSDiMsggTWxcI/Lvag6eHjkSc67RTrj9
+6oxj0ipVRqjxW4X6HQIDAQAB</textarea>
+        <hr/> 
+        注意+好的处理
+    </div>
+</body>
+</html>

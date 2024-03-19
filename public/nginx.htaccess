@@ -1,0 +1,6 @@
+if (!-e $request_filename) {
+    rewrite ^/api.php(.*)$ /api.php?s=/$1 last;
+    rewrite  ^(.*)$  /api.php?s=$1  last;
+    break;
+}
+try_files $uri /api.php;
