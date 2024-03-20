@@ -12,6 +12,7 @@ use app\api\model\ord\User;
 use app\api\model\order\OrderDetail;
 use app\api\model\order\OrderMain;
 use app\api\service\BaseService;
+use think\Db;
 
 class OrderService extends BaseService
 {
@@ -41,11 +42,14 @@ class OrderService extends BaseService
         if (!empty($orgId)) {
             $object->where("ORG_CODE", $orgId);
         }
+        if (!empty($param['USER_ID'])) {
+            $object->where("USER_ID", $param['USER_ID']);
+        }
         if (!empty($param['PLACE_ID'])) {
             $object->where("PLACE_ID", $param['PLACE_ID']);
         }
         if (!empty($param['ORDER_NO'])) {
-            $object->where("ORDER_NO", $param['ORDER_NO']);
+            $object->where("ORDER_NO", 'like', $param['ORDER_NO']."%");
         }
         if (!empty($param['STATE'])) {
             $object->where("STATE", $param['STATE']);
@@ -61,14 +65,34 @@ class OrderService extends BaseService
             ->order('CREATE_DATE')
             ->paginate(['list_rows' => $param['page_size'], 'query' => $param['page']])
             ->toArray();
-        $userIds = array_column($list['data'], 'USER_ID');
-        $userList = $this->userModel->whereIn('ID', $userIds)->column('ID,EMP_ID,NICKNAME,MOBILE', 'ID');
+        $deList = $userList = [];
+        if (!empty($list['data'])) {
+            //用户信息
+            $userIds = array_column($list['data'], 'USER_ID');
+            $userList = $this->userModel->whereIn('ID', $userIds)->column('ID,EMP_ID,NICKNAME,MOBILE', 'ID');
+            //菜单基础信息
+            $orderIds = implode(",", array_column($list['data'], 'ID'));
+            $sql = "SELECT de.ID,de.ORD_ID,de.DISH_NAME,fi.FILE_PATH,fi.FILE_TYPE FROM ord_order_detail de 
+                LEFT JOIN ord_dishes di ON di.ID=de.DISH_ID 
+                LEFT JOIN ord_dishes_file df ON df.DISHES_ID=di.ID 
+                LEFT JOIN ord_file fi ON fi.ID=df.FILE_ID 
+                WHERE de.ORD_ID IN ({$orderIds}) 
+                GROUP BY de.ID";
+            $res = Db::query($sql);
+
+            $deList = [];
+            foreach ($res as $val) {
+                $deList[$val['ORD_ID']][] = $val;
+            }
+        }
 
         foreach ($list['data'] as &$v) {
             $user = $userList[$v['USER_ID']] ?? [];
+
             $v['EMP_ID'] = $user['EMP_ID'] ?? '';
             $v['NICKNAME'] = $user['NICKNAME'] ?? '';
             $v['MOBILE'] = $user['MOBILE'] ?? '';
+            $v['DETAIL'] = $deList[$v['ID']] ?? [];
         }
 
         return $list;
@@ -86,7 +110,9 @@ class OrderService extends BaseService
         $dishIds = array_column($detail, 'DISH_ID');
         $dishList = $this->dishesModel
             ->whereIn('ID', $dishIds)
-            ->column('ID,CATE_ID,NAME,PRICE');
+            ->field('ID,CATE_ID,NAME,PRICE')
+            ->select();
+        $dishList = collection($dishList)->toArray();
         $fileList = $this->fileModel->getFile($dishIds);
 
         foreach ($dishList as &$v) {
@@ -96,4 +122,5 @@ class OrderService extends BaseService
 
         return $detail;
     }
+
 }
