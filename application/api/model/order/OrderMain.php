@@ -20,9 +20,10 @@ class OrderMain Extends Model
     protected $updateTime = 'UPDATE_DATE';
     // 追加属性
     protected $append = [
+        'STATE_TEXT'
     ];
 
-    protected $stateMap = [
+    public $stateMap = [
         'WAIT_PAY' => '待支付',
         'PAYING' => '支付中',
         'PAY_SUCCESS' => '支付成功',
@@ -31,4 +32,10 @@ class OrderMain Extends Model
         'REFUND_SUCCESS' => '退款成功',
         'REFUND_FAIL' => '退款失败',
     ];
+
+    public function getStateTextAttr($value, $data)
+    {
+        return $this->stateMap[$data['STATE']] ?? '';
+    }
+
 }

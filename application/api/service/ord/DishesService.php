@@ -42,7 +42,6 @@ class DishesService extends BaseService
         }
 
         $list = $object
-            ->order('SEQ')
             ->paginate(['list_rows' => $param['page_size'], 'query' => $param['page']])
             ->toArray();
 
@@ -61,19 +60,17 @@ class DishesService extends BaseService
         return $list;
     }
 
-    public function info(array $param)
+    public function info(int $dishesId)
     {
-        $dishes = $this->dishesModel->find($param['ID']);
+        $dishes = $this->dishesModel->find($dishesId);
         if (!$dishes) {
             app_exception('请求参数异常');
         }
         $dishesId = $dishes['ID'];
 
-        $fileList = $this->fileModel->whereIn('ID', function ($query) use ($dishesId){
-            $query->name('dishes_file')->where('DISHES_ID', $dishesId)->field('FILE_ID');
-        })->find();
+        $fileList = $this->fileModel->getFile($dishesId);
 
-        $dishes['file'] = $fileList;
+        $dishes['FILE'] = $fileList;
 
         return $dishes;
     }
@@ -167,9 +164,9 @@ class DishesService extends BaseService
         return false;
     }
 
-    public function del(array $param)
+    public function del(int $dishesId)
     {
-        $dishes = $this->dishesModel->find($param['ID']);
+        $dishes = $this->dishesModel->find($dishesId);
         if (!$dishes) {
             app_exception('请求参数异常');
         }

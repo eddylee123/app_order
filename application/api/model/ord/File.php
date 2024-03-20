@@ -22,4 +22,14 @@ class File Extends Model
     protected $append = [
     ];
 
+    public function getFile($dishesId)
+    {
+        $list = $this->field('ID,FILE_PATH,FILE_TYPE')
+            ->whereIn('ID', function ($query) use ($dishesId){
+            $query->name('dishes_file')->where('DISHES_ID', $dishesId)->field('FILE_ID');
+            })
+            ->select();
+
+        return collection($list)->toArray();
+    }
 }

@@ -38,29 +38,23 @@ class Dishes extends BaseController
      * 新增、编辑房间
      * DateTime: 2024-03-14 10:00
      */
-    public function saveRoom()
+    public function save()
     {
-
-        $paramRoom = $this->Data['ROOM'] ?? [];
-        $paramBed = $this->Data['BED'] ?? [];
-        $paramProp = $this->Data['PROP'] ?? [];
-
-        $validate = new RoomValidate();
-        $paramRoom['ORG_ID'] = $this->OrgId;
-        if (!empty($paramRoom['ID'])) {
+//        $validate = new RoomValidate();
+        if (!empty($this->Data['ID'])) {
             //编辑
-            $result = $validate->scene('edit')->check($paramRoom);
-            if (!$result) {
-                app_exception($validate->getError());
-            }
-            $rs = DishesService::instance()->edit($paramRoom, $paramBed, $paramProp);
+//            $result = $validate->scene('edit')->check($paramRoom);
+//            if (!$result) {
+//                app_exception($validate->getError());
+//            }
+            $rs = DishesService::instance()->edit($this->OrgId, $this->Data);
         } else {
             //新增
-            $result = $validate->scene('add')->check($paramRoom);
-            if (!$result) {
-                app_exception($validate->getError());
-            }
-            $rs = DishesService::instance()->add($paramRoom, $paramBed, $paramProp);
+//            $result = $validate->scene('add')->check($paramRoom);
+//            if (!$result) {
+//                app_exception($validate->getError());
+//            }
+            $rs = DishesService::instance()->add($this->OrgId, $this->Data);
         }
 
         app_response(200, $rs);
