@@ -2,6 +2,7 @@
 
 namespace app\api\model\order;
 
+use app\api\model\ord\Config;
 use think\Model;
 
 /**
@@ -20,7 +21,8 @@ class OrderMain Extends Model
     protected $updateTime = 'UPDATE_DATE';
     // 追加属性
     protected $append = [
-        'STATE_TEXT'
+        'STATE_TEXT',
+        'MEAL_TEXT'
     ];
 
     public $stateMap = [
@@ -36,6 +38,17 @@ class OrderMain Extends Model
     public function getStateTextAttr($value, $data)
     {
         return $this->stateMap[$data['STATE']] ?? '';
+    }
+
+    public function getMealTextAttr($value, $data)
+    {
+        $confModel = new Config();
+        $conf = $confModel->getConf($data['ORG_CODE'], 'MEAL_TYPE');
+        if (empty($conf)) {
+            return '';
+        }
+
+        return $conf[$data['MEAL_TYPE']] ?? '';
     }
 
 }

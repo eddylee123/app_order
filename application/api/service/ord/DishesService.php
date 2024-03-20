@@ -47,14 +47,12 @@ class DishesService extends BaseService
 
         $cateIds = array_column($list['data'], 'CATE_ID');
         $cateList = $this->cateModel->whereIn('ID', $cateIds)->column('NAME', 'ID');
-        $fileIds = array_column($list['data'], 'ID');
-
-        $fileList = $this->fileModel->whereIn('ID', function ($query) use ($fileIds){
-            $query->name('dishes_file')->whereIn('DISHES_ID', $fileIds)->field('FILE_ID');
-        })->select();
+        $dishIds = array_column($list['data'], 'ID');
+        $fileList = $this->fileModel->getFile($dishIds);
 
         foreach ($list['data'] as &$v) {
             $v['CATE_NAME'] = $cateList[$v['CATE_ID']] ?? '';
+            $v['FILE'] = $fileList[$v['ID']] ?? [];
         }
 
         return $list;
@@ -68,9 +66,9 @@ class DishesService extends BaseService
         }
         $dishesId = $dishes['ID'];
 
-        $fileList = $this->fileModel->getFile($dishesId);
+        $fileList = $this->fileModel->getFile([$dishesId]);
 
-        $dishes['FILE'] = $fileList;
+        $dishes['FILE'] = $fileList[$dishesId] ?? [];
 
         return $dishes;
     }

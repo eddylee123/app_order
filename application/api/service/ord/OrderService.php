@@ -8,6 +8,7 @@ use app\api\model\ord\Category;
 use app\api\model\ord\Config;
 use app\api\model\ord\Dishes;
 use app\api\model\ord\File;
+use app\api\model\ord\User;
 use app\api\model\order\OrderDetail;
 use app\api\model\order\OrderMain;
 use app\api\service\BaseService;
@@ -20,6 +21,7 @@ class OrderService extends BaseService
     protected $dishesModel;
     protected $fileModel;
     protected $cateModel;
+    protected $userModel;
 
     public function __construct()
     {
@@ -29,6 +31,7 @@ class OrderService extends BaseService
         $this->dishesModel = new Dishes();
         $this->fileModel = new File();
         $this->cateModel = new Category();
+        $this->userModel = new User();
     }
 
     public function lists(string $orgId, array $param)
@@ -41,8 +44,8 @@ class OrderService extends BaseService
         if (!empty($param['PLACE_ID'])) {
             $object->where("PLACE_ID", $param['PLACE_ID']);
         }
-        if (!empty($param['PAYMENT_ID'])) {
-            $object->where("PAYMENT_ID", $param['PAYMENT_ID']);
+        if (!empty($param['ORDER_NO'])) {
+            $object->where("ORDER_NO", $param['ORDER_NO']);
         }
         if (!empty($param['STATE'])) {
             $object->where("STATE", $param['STATE']);
@@ -58,11 +61,14 @@ class OrderService extends BaseService
             ->order('CREATE_DATE')
             ->paginate(['list_rows' => $param['page_size'], 'query' => $param['page']])
             ->toArray();
+        $userIds = array_column($list['data'], 'USER_ID');
+        $userList = $this->userModel->whereIn('ID', $userIds)->column('ID,EMP_ID,NICKNAME,MOBILE', 'ID');
 
-        foreach ($list['data'] as $v) {
-            !empty($v['PAY_AMT']) && $v['PAY_AMT'] = $v['PAY_AMT'] / 100;
-            !empty($v['ORDER_AMT']) && $v['ORDER_AMT'] = $v['ORDER_AMT'] / 100;
-            !empty($v['REFUND_AMT']) && $v['REFUND_AMT'] = $v['REFUND_AMT'] / 100;
+        foreach ($list['data'] as &$v) {
+            $user = $userList[$v['USER_ID']] ?? [];
+            $v['EMP_ID'] = $user['EMP_ID'] ?? '';
+            $v['NICKNAME'] = $user['NICKNAME'] ?? '';
+            $v['MOBILE'] = $user['MOBILE'] ?? '';
         }
 
         return $list;
@@ -80,12 +86,14 @@ class OrderService extends BaseService
         $dishIds = array_column($detail, 'DISH_ID');
         $dishList = $this->dishesModel
             ->whereIn('ID', $dishIds)
-            ->column('CATE_ID,NAME,PRICE');
-        $fileList = $this->fileModel->whereIn('ID', function ($query) use ($dishIds){
-            $query->name('dishes_file')->where('DISHES_ID', $dishIds)->field('FILE_ID');
-        })->column('ID,FILE_PATH,FILE_TYPE');
-        $cateIds = array_column($dishList, 'CATE_ID');
-        $cateList = $this->cateModel->whereIn('ID', $cateIds)->column('NAME', 'ID');
+            ->column('ID,CATE_ID,NAME,PRICE');
+        $fileList = $this->fileModel->getFile($dishIds);
 
+        foreach ($dishList as &$v) {
+            $v['FILE'] = $fileList[$v['ID']] ?? [];
+        }
+        $detail['DISH'] = $dishList;
+
+        return $detail;
     }
 }

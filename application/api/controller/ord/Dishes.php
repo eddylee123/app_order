@@ -11,6 +11,10 @@ class Dishes extends BaseController
         parent::_initialize();
     }
 
+    /**
+     * 列表
+     * DateTime: 2024-03-20 15:42
+     */
     public function lists()
     {
         $this->Data['page'] = $this->Data['page'] ?? 1;
@@ -22,8 +26,8 @@ class Dishes extends BaseController
     }
 
     /**
-     * 房间详情
-     * DateTime: 2024-03-14 9:59
+     * 详情
+     * DateTime: 2024-03-20 15:41
      */
     public function info()
     {
@@ -35,7 +39,7 @@ class Dishes extends BaseController
     }
 
     /**
-     * 新增、编辑房间
+     * 新增、编辑
      * DateTime: 2024-03-14 10:00
      */
     public function save()
@@ -61,7 +65,7 @@ class Dishes extends BaseController
     }
 
     /**
-     * 删除房间
+     * 删除
      * DateTime: 2024-03-14 10:00
      */
     public function del()
