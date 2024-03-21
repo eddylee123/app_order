@@ -52,3 +52,27 @@ function data_response($code, $data, $msg, $type = 'json', array $header = [])
     $response = Response::create($result, $type, $code)->header($header);
     throw new HttpResponseException($response);
 }
+
+/**
+ * 递归分类
+ * @param $category
+ * @param int $pid
+ * @return array
+ * DateTime: 2024-03-21 9:41
+ */
+function getTree($category, $pid=0){
+    $data = [];
+    foreach ($category as $item){
+        if($item['PID'] == $pid){
+            $arr['ID'] = $item['ID'];
+            $arr['NAME'] = $item['NAME'];
+            $cate = getTree($category, $item['ID']);
+            if(!empty($cate)){
+                $arr['child'] = $cate;
+            }
+            $data[] = $arr;
+            unset($arr);
+        }
+    }
+    return $data;
+}

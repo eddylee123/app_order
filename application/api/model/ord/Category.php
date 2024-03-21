@@ -22,4 +22,20 @@ class Category Extends Model
     protected $append = [
     ];
 
+    public $statusMap = [
+        'ON' => '开启',
+        'OFF' => '关闭'
+    ];
+
+    public function getCateTree()
+    {
+        $list = $this
+            ->where('STATUS', "ON")
+            ->order('SEQ', 'desc')
+            ->column('ID,PID,NAME');
+
+        return getTree($list);
+    }
+
+
 }
