@@ -27,7 +27,7 @@ class Config Extends Model
     {
         $rs = $this
             ->where("NAME", $field)
-            ->where("ORG_CODE", $orgId)
+//            ->where("ORG_CODE", $orgId)
             ->value("VAL");
         return !empty($rs) ? json_decode($rs, true) : [];
     }

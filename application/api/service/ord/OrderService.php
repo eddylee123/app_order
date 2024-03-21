@@ -35,15 +35,15 @@ class OrderService extends BaseService
         $this->userModel = new User();
     }
 
-    public function lists(string $orgId, array $param)
+    public function lists(string $orgId, array $param, int $userId = 0)
     {
         $object = $this->mainModel;
 
         if (!empty($orgId)) {
             $object->where("ORG_CODE", $orgId);
         }
-        if (!empty($param['USER_ID'])) {
-            $object->where("USER_ID", $param['USER_ID']);
+        if (!empty($userId)) {
+            $object->where("USER_ID", $userId);
         }
         if (!empty($param['PLACE_ID'])) {
             $object->where("PLACE_ID", $param['PLACE_ID']);
@@ -100,6 +100,11 @@ class OrderService extends BaseService
 
     public function info(int $orderId)
     {
+        $order = $this->mainModel
+            ->field('ORDER_NO,STATE,PAY_AMT,ORDER_AMT,MEAL_TYPE')
+            ->find($orderId);
+
+
         $detail = $this->detailModel
             ->where('ORD_ID', $orderId)
             ->select();
@@ -118,9 +123,51 @@ class OrderService extends BaseService
         foreach ($dishList as &$v) {
             $v['FILE'] = $fileList[$v['ID']] ?? [];
         }
+        $detail['ORDER'] = $order;
         $detail['DISH'] = $dishList;
 
         return $detail;
+    }
+
+    public function add(int $userId, array $param)
+    {
+        $dishIds = array_column($param['DISH'],'ID');
+        $dish = $this->dishesModel
+            ->whereIn('ID', $dishIds)
+            ->column('*', 'ID');
+
+        $detail = [];
+        foreach ($param['DISH'] as $v) {
+
+            if (empty($dish[$v['ID']])) {
+                app_exception('菜单信息异常');
+            }
+            $dishOrd = $dish[$v['ID']];
+
+            $detail[] = [
+                'DISH_ID' => $dishOrd['ID'],
+                'UNIT_PRICE' => $dishOrd['PRICE'],
+                'DISH_NAME' => $dishOrd['NAME'],
+                'NUM' => $v['NUM'],
+                'TOTAL_AMT' => $dishOrd['NAME'] * $v['NUM']
+            ];
+        }
+        $payAmt = array_sum(array_column($detail, 'TOTAL_AMT'));
+
+        $dish1= reset($dish);
+        $main = [
+            'ORDER_NO' => getOrderNo(),
+            'ORG_CODE' => $dish1['ORG_CODE'],
+            'PLACE_ID' => $dish1['PLACE_ID'],
+            'USER_ID' => $userId,
+            'PAYMENT_ID' => '',
+            'STATE' => 'WAIT_PAY',
+            'PAY_AMT' => $payAmt,
+            'ORDER_AMT' => $payAmt,
+            'REMARK' => $param['REMARK'],
+            'MEAL_TYPE' => '午餐',
+            'CODE' => rand_str(16),
+        ];
     }
 
 }

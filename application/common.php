@@ -797,24 +797,6 @@ function rand_str($length){
     return substr($randStr,0,$length);//substr(string,start,length);返回字符串的一部分
 }
 
-function output($code, $msg='', $data=[])
-{
-    return compact('code', 'msg', 'data');
-}
-
-function outputC($code, $msg='', $data=[])
-{
-    return json_encode(compact('code', 'msg', 'data'), JSON_UNESCAPED_UNICODE);
-}
-
-
-function outJson($data)
-{
-    header('Content-Type:application/json; charset=utf-8');
-    exit(json_encode($data, JSON_UNESCAPED_UNICODE));
-}
-
-
 /**
  * 在字符串首尾拼接字符
  *

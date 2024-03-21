@@ -26,7 +26,7 @@ class OrderMain Extends Model
     ];
 
     public $stateMap = [
-        'WAIT_PAY' => '待支付',
+        'WAIT_PAY' => '未支付',
         'PAYING' => '支付中',
         'PAY_SUCCESS' => '支付成功',
         'PAY_FAIL' => '支付失败',
@@ -43,7 +43,7 @@ class OrderMain Extends Model
     public function getMealTextAttr($value, $data)
     {
         $confModel = new Config();
-        $conf = $confModel->getConf($data['ORG_CODE'], 'MEAL_TYPE');
+        $conf = $confModel->getConf('', 'MEAL_TYPE');
         if (empty($conf)) {
             return '';
         }

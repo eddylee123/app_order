@@ -60,7 +60,8 @@ function data_response($code, $data, $msg, $type = 'json', array $header = [])
  * @return array
  * DateTime: 2024-03-21 9:41
  */
-function getTree($category, $pid=0){
+function getTree($category, $pid=0)
+{
     $data = [];
     foreach ($category as $item){
         if($item['PID'] == $pid){
@@ -75,4 +76,15 @@ function getTree($category, $pid=0){
         }
     }
     return $data;
+}
+
+/**
+ * 生成订单号
+ * @param int $len
+ * @return string
+ * DateTime: 2024-03-21 21:55
+ */
+function getOrderNo($len = 20)
+{
+    return date('ymd') . str_pad(mt_rand(1, 99999), $len, '0', STR_PAD_LEFT);
 }
