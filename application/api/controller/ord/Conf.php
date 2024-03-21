@@ -22,8 +22,11 @@ class Conf extends BaseController
 
     public function order()
     {
-        return [
+
+        $rs = [
             'stateMap' => $this->orderMainModel->stateMap
         ];
+
+        app_response(200, $rs);
     }
 }

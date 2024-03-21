@@ -154,6 +154,7 @@ class OrderService extends BaseService
         }
         $payAmt = array_sum(array_column($detail, 'TOTAL_AMT'));
 
+        $time = date("Y-m-d h:i:s");
         $dish1= reset($dish);
         $main = [
             'ORDER_NO' => getOrderNo(),
@@ -167,7 +168,23 @@ class OrderService extends BaseService
             'REMARK' => $param['REMARK'],
             'MEAL_TYPE' => '午餐',
             'CODE' => rand_str(16),
+            'CREATE_DATE' => $time
         ];
+
+        $ordId = $this->mainModel->insertGetId($main);
+        if (!$ordId) {
+            app_exception('结算失败，请稍后再试');
+        }
+
+        foreach ($detail as &$val) {
+            $val['ORD_ID'] = $ordId;
+        }
+
+        $rs0 = $this->detailModel->saveAll($detail);
+        if (!$rs0) {
+            app_exception('系统异常，请稍后再试');
+        }
+        return true;
     }
 
 }
