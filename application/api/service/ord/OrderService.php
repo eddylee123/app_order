@@ -76,8 +76,8 @@ class OrderService extends BaseService
                 LEFT JOIN ord_dishes di ON di.ID=de.DISH_ID 
                 LEFT JOIN ord_dishes_file df ON df.DISHES_ID=di.ID 
                 LEFT JOIN ord_file fi ON fi.ID=df.FILE_ID 
-                WHERE de.ORD_ID IN ({$orderIds}) 
-                GROUP BY de.ID";var_dump($sql);exit;
+                WHERE de.ORD_ID IN ({$orderIds})";
+//                GROUP BY de.ID;
             $res = Db::query($sql);
 
             $deList = [];
