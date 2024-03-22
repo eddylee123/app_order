@@ -103,7 +103,7 @@ class OrderService extends BaseService
     public function info(int $orderId)
     {
         $order = $this->mainModel
-            ->field('ORDER_NO,STATE,PAY_AMT,ORDER_AMT,MEAL_TYPE,CODE,CHECK')
+            ->field('ORDER_NO,STATE,PAY_AMT,ORDER_AMT,MEAL_TYPE,CODE,CHECK,CREATE_DATE')
             ->find($orderId);
 
         $detail = $this->detailModel
