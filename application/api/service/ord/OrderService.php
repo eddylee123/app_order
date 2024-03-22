@@ -4,6 +4,7 @@
 namespace app\api\service\ord;
 
 
+use app\api\library\OrderPay;
 use app\api\model\ord\Category;
 use app\api\model\ord\Config;
 use app\api\model\ord\Dishes;
@@ -217,6 +218,28 @@ class OrderService extends BaseService
         ];
     }
 
+    public function pay(array $param)
+    {
+        //订单信息
+        $main = $this->mainModel->find($param['ORDER_ID']);
+        if (empty($main)) {
+            app_exception('订单信息异常');
+        }
 
+        //用户信息
+        $data = [
+            'openId' => $param['openId'],
+            'title' => 'order',
+            'body' => $main['ORDER_NO'],
+            'payAmt' => $main['PAY_AMT'],
+            'ipAddress' => $param['IP'],
+            'expireSeconds' => 180,
+            'channel' => $param['CHANNEL'],
+            'tradeType' => $param['TRADE_TYPE'],
+            'sourceTag' => 'order',
+        ];
+
+        $rs = OrderPay::pay($data);
+    }
 
 }

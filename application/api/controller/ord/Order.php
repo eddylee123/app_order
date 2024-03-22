@@ -69,4 +69,19 @@ class Order extends BaseController
 
         app_response(200, $rs);
     }
+
+    public function pay()
+    {
+        $validate = new OrderValidate();
+        $result = $validate->scene('pay')->check($this->Data);
+        if (!$result) {
+            app_exception($validate->getError());
+        }
+        $this->Data['openId'] = $this->User['openId'] ?? '';
+        $this->Data['IP'] = $this->request->param('ipAddress', '');
+
+        $rs = OrderService::instance()->pay($this->Data);
+
+        app_response(200, $rs);
+    }
 }

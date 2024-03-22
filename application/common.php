@@ -857,8 +857,17 @@ function get_day($date1, $date2)
     return ceil((strtotime($date2) - strtotime($date1)) / 86400);
 }
 
-
-function curl_request($url, $method = '', $data = '', $header = [])
+/**
+ * 请求
+ * @param $url
+ * @param string $method
+ * @param string $data
+ * @param array $header
+ * @param bool $json
+ * @return bool|string
+ * DateTime: 2024-03-22 11:06
+ */
+function curl_request($url, $method = '', $data = '', $header = [], $json=true)
 {
     $data_string = json_encode($data);
 
@@ -869,13 +878,22 @@ function curl_request($url, $method = '', $data = '', $header = [])
     curl_setopt($action, CURLOPT_HEADER, 0);
     curl_setopt($action, CURLOPT_SSL_VERIFYPEER, 0);
     curl_setopt($action, CURLOPT_SSL_VERIFYHOST, 0);
+
+    $httpHeader = [
+        'Content-Length: ' . strlen($data_string)
+    ];
+    if ($json) {
+        $httpHeader = array_merge($httpHeader, ['Content-Type: application/json']);
+    } else {
+        $httpHeader = array_merge($httpHeader, ['Content-Type: multipart/form-data']);
+    }
+    if ($header) {
+        $httpHeader = array_merge($httpHeader, $header);
+    }
     if (strtoupper($method) == 'POST') {
         curl_setopt($action, CURLOPT_POST, 1);
         curl_setopt($action, CURLOPT_POSTFIELDS, $data_string);
-        curl_setopt($action, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data_string))
-        );
+        curl_setopt($action, CURLOPT_HTTPHEADER, $httpHeader);
     }
     $result = curl_exec($action);
     curl_close($action);
