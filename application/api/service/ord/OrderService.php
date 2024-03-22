@@ -238,13 +238,19 @@ class OrderService extends BaseService
 
         try {
             $resp = OrderPay::pay($data);
-            if ($resp['success'] == true) {
-                $res = json_decode($resp['data'], true);
+            if ($resp['success'] != true) {
+                app_exception('支付请求失败');
             }
+            $res = json_decode($resp['data'], true);
+            if (!empty($res['credential'])) {
+                return json_decode($res['credential'], true);
+            }
+
         } catch (Exception $e) {
             app_exception($e->getMessage());
         }
 
+        return [];
     }
 
 }
