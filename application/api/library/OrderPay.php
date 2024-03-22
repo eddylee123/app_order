@@ -26,7 +26,7 @@ class OrderPay
         ];
 
         $rs = curl_request($url, 'POST', $body);;
-var_dump($rs);exit;
+
         $data = [];
         if ($rs) {
             $data = json_decode($rs, true);
