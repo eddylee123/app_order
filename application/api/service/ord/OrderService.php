@@ -233,7 +233,7 @@ class OrderService extends BaseService
             'body' => $main['ORDER_NO'],
             'payAmt' => $main['PAY_AMT'],
             'ipAddress' => $param['IP'],
-            'expireSeconds' => 180,
+            'expireSeconds' => 600,
             'channel' => $param['CHANNEL'],
             'tradeType' => $param['TRADE_TYPE'],
             'sourceTag' => 'order',
