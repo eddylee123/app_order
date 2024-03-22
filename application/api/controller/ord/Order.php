@@ -6,6 +6,7 @@ namespace app\api\controller\ord;
 
 use app\api\controller\BaseController;
 use app\api\service\ord\OrderService;
+use app\api\validate\OrderValidate;
 
 class Order extends BaseController
 {
@@ -43,6 +44,28 @@ class Order extends BaseController
         if (empty($this->Data['ID'])) app_exception('请求参数不能为空');
 
         $rs = OrderService::instance()->info($this->Data['ID']);
+
+        app_response(200, $rs);
+    }
+
+    /**
+     * 结算
+     * DateTime: 2024-03-22 8:56
+     */
+    public function settle()
+    {
+        if (empty($this->Data['DISH'])) {
+            app_exception('请求参数异常');
+        }
+        $validate = new OrderValidate();
+        foreach ($this->Data['DISH'] as $dish) {
+            $result = $validate->scene('settle')->check($dish);
+            if (!$result) {
+                app_exception($validate->getError());
+            }
+        }
+
+        $rs = OrderService::instance()->settle($this->User['userId'], $this->Data);
 
         app_response(200, $rs);
     }

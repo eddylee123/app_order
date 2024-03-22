@@ -129,8 +129,16 @@ class OrderService extends BaseService
         return $detail;
     }
 
-    public function add(int $userId, array $param)
+    public function settle(int $userId, array $param)
     {
+        //去重
+        $exist = $this->mainModel
+            ->where('USER_ID', $userId)
+            ->whereIn('STATE', ['WAIT_PAY','PAYING'])
+            ->value('ID');
+        if ($exist) {
+            app_exception('当前存在未支付订单，请勿重复提交');
+        }
         $dishIds = array_column($param['DISH'],'ID');
         $dish = $this->dishesModel
             ->whereIn('ID', $dishIds)
@@ -149,15 +157,32 @@ class OrderService extends BaseService
                 'UNIT_PRICE' => $dishOrd['PRICE'],
                 'DISH_NAME' => $dishOrd['NAME'],
                 'NUM' => $v['NUM'],
-                'TOTAL_AMT' => $dishOrd['NAME'] * $v['NUM']
+                'TOTAL_AMT' => $dishOrd['PRICE'] * $v['NUM']
             ];
         }
         $payAmt = array_sum(array_column($detail, 'TOTAL_AMT'));
 
+        $mealTime = [
+            'BREAKFAST' =>['06:00:00','10:59:59'],
+            'LUNCH' =>['11:00:00','16:59:59'],
+            'DINNER' =>['17:00:00','21:59:59'],
+            'SNACK' =>['22:00:00','23:59:59'],
+        ];
+        $mealType = '未知';
+        $timestamp = time();
+        foreach ($mealTime as $k=>$v) {
+            [$start, $end] = $v;
+            $startTime = strtotime(date("Y-m-d ".$start, $timestamp));
+            $endTime = strtotime(date("Y-m-d ".$end, $timestamp));
+            if ($startTime <= $timestamp && $timestamp <= $endTime) {
+                $mealType = $k;
+                break;
+            }
+        }
         $time = date("Y-m-d h:i:s");
         $dish1= reset($dish);
         $main = [
-            'ORDER_NO' => getOrderNo(),
+            'ORDER_NO' => get_order_no(),
             'ORG_CODE' => $dish1['ORG_CODE'],
             'PLACE_ID' => $dish1['PLACE_ID'],
             'USER_ID' => $userId,
@@ -165,9 +190,9 @@ class OrderService extends BaseService
             'STATE' => 'WAIT_PAY',
             'PAY_AMT' => $payAmt,
             'ORDER_AMT' => $payAmt,
-            'REMARK' => $param['REMARK'],
-            'MEAL_TYPE' => '午餐',
-            'CODE' => rand_str(16),
+            'REMARK' => $param['REMARK'] ?? '',
+            'MEAL_TYPE' => $mealType,
+            'CODE' => rand_str(32),
             'CREATE_DATE' => $time
         ];
 
@@ -184,7 +209,14 @@ class OrderService extends BaseService
         if (!$rs0) {
             app_exception('系统异常，请稍后再试');
         }
-        return true;
+        return [
+            'ORDER_ID' => $ordId,
+            'ORDER_NO' => $main['ORDER_NO'],
+            'PAY_AMT' => $main['PAY_AMT'],
+            'ORDER_AMT' => $main['ORDER_AMT'],
+        ];
     }
+
+
 
 }

@@ -34,7 +34,7 @@ class Category Extends Model
             ->order('SEQ', 'desc')
             ->column('ID,PID,NAME');
 
-        return getTree($list);
+        return get_tree($list);
     }
 
 
