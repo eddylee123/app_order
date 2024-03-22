@@ -14,6 +14,7 @@ use app\api\model\order\OrderDetail;
 use app\api\model\order\OrderMain;
 use app\api\service\BaseService;
 use think\Db;
+use think\Exception;
 
 class OrderService extends BaseService
 {
@@ -105,8 +106,8 @@ class OrderService extends BaseService
             ->field('ORDER_NO,STATE,PAY_AMT,ORDER_AMT,MEAL_TYPE')
             ->find($orderId);
 
-
         $detail = $this->detailModel
+            ->field('ID,DISH_ID,UNIT_PRICE,DISH_NAME,NUM,TOTAL_AMT')
             ->where('ORD_ID', $orderId)
             ->select();
         if (empty($detail)) {
@@ -114,20 +115,16 @@ class OrderService extends BaseService
         }
         $detail = collection($detail)->toArray();
         $dishIds = array_column($detail, 'DISH_ID');
-        $dishList = $this->dishesModel
-            ->whereIn('ID', $dishIds)
-            ->field('ID,CATE_ID,NAME,PRICE')
-            ->select();
-        $dishList = collection($dishList)->toArray();
         $fileList = $this->fileModel->getFile($dishIds);
 
-        foreach ($dishList as &$v) {
-            $v['FILE'] = $fileList[$v['ID']] ?? [];
+        foreach ($detail as &$v) {
+            $v['FILE'] = $fileList[$v['DISH_ID']] ?? [];
         }
-        $detail['ORDER'] = $order;
-        $detail['DISH'] = $dishList;
 
-        return $detail;
+        $data['ORDER'] = $order;
+        $data['DETAIL'] = $detail;
+
+        return $data;
     }
 
     public function settle(int $userId, array $param)
@@ -239,7 +236,15 @@ class OrderService extends BaseService
             'sourceTag' => 'order',
         ];
 
-        $rs = OrderPay::pay($data);
+        try {
+            $resp = OrderPay::pay($data);
+            if ($resp['success'] == true) {
+                $res = json_decode($resp['data'], true);
+            }
+        } catch (Exception $e) {
+            app_exception($e->getMessage());
+        }
+
     }
 
 }

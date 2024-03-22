@@ -26,13 +26,10 @@ class OrderPay
         ];
 
         $rs = curl_request($url, 'POST', $body);;
-var_dump($rs);exit;
-        $data = ["total"=>0,"records"=>[]];
+
+        $data = [];
         if ($rs) {
-            $datas = json_decode($rs, true);
-            if (isset($datas['data'])) {
-                $data = json_decode($datas['data'], true);
-            }
+            $data = json_decode($rs, true);
         }
 
         return $data;
