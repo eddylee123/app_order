@@ -43,6 +43,20 @@ class OrderPay
     public static function refund(array $param)
     {
         $url = self::host.'/as/payment/refund';
+        $body = [
+            'traceId' => Request::instance()->param('traceId', ''),
+            'ipAddress' => Request::instance()->param('ipAddress', ''),
+            'data' => json_encode($param, JSON_UNESCAPED_UNICODE),
+        ];
+
+        $rs = curl_request($url, 'POST', $body);;
+
+        $data = [];
+        if ($rs) {
+            $data = json_decode($rs, true);
+        }
+
+        return $data;
     }
 
     /**
@@ -53,5 +67,19 @@ class OrderPay
     public static function query(array $param)
     {
         $url = self::host.'/as/payment/query';
+        $body = [
+            'traceId' => Request::instance()->param('traceId', ''),
+            'ipAddress' => Request::instance()->param('ipAddress', ''),
+            'data' => json_encode($param, JSON_UNESCAPED_UNICODE),
+        ];
+
+        $rs = curl_request($url, 'POST', $body);;
+
+        $data = [];
+        if ($rs) {
+            $data = json_decode($rs, true);
+        }
+
+        return $data;
     }
 }

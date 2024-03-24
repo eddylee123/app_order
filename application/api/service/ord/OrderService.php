@@ -253,4 +253,42 @@ class OrderService extends BaseService
         return [];
     }
 
+    public function refund(array $param)
+    {
+        $main = $this->mainModel->find($param['ORDER_ID']);
+        if (empty($main)) {
+            app_exception('订单信息异常');
+        }
+        if ($main['STATE'] != 'PAY_SUCCESS') {
+            app_exception('订单未支付，无法退款');
+        }
+        if ($param['REFUND_AMT'] > $main['PAY_AMT']) {
+            app_exception('退款金额异常');
+        }
+        $data = [
+            'paymentId' => $main['PAYMENT_ID'],
+            'refundAmt' => $param['REFUND_AMT'],
+            'sourceTag' => 'order',
+            'refundReason' => $param['REASON'],
+        ];
+        $resp = OrderPay::refund($data);
+        if ($resp['success'] != true) {
+            app_exception('退款请求失败');
+        }
+        $resData = json_decode($resp['data'], true);
+        //退款更新
+        $update = [
+            'REFUND_ID' => $resData['REFUND_ID'],
+            'STATE' => 'REFUND_SUCCESS',
+            'REFUND_AMT' => $param['REFUND_AMT'],
+            'REMARK' => $param['REASON'],
+        ];
+        $rs0 = $main->save($update);
+        if ($rs0 === false) {
+            app_exception('退款失败');
+        }
+
+        return $param['ORDER_ID'];
+    }
+
 }

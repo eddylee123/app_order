@@ -84,4 +84,17 @@ class Order extends BaseController
 
         app_response(200, $rs);
     }
+
+    public function refund()
+    {
+        $validate = new OrderValidate();
+        $result = $validate->scene('refund')->check($this->Data);
+        if (!$result) {
+            app_exception($validate->getError());
+        }
+
+        $rs = OrderService::instance()->refund($this->Data);
+
+        app_response(200, $rs);
+    }
 }
