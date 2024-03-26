@@ -14,9 +14,9 @@ class CategoryService extends BaseService
         $this->cateModel = new Category();
     }
 
-    public function listTree()
+    public function listTree(string $orgId, string $mealType)
     {
-        return $this->cateModel->getCateTree();
+        return $this->cateModel->getCateTree($orgId, $mealType);
     }
 
     public function info(int $id)

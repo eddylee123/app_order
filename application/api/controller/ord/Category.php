@@ -15,8 +15,10 @@ class Category extends BaseController
     {
         $this->Data['page'] = $this->Data['page'] ?? 1;
         $this->Data['page_size'] = $this->Data['page_size'] ?? 999;
-
-        $rs = CategoryService::instance()->listTree();
+        if (empty($this->Data['MEAL_TYPE'])) {
+            $this->Data['MEAL_TYPE'] = 'LUNCH';
+        }
+        $rs = CategoryService::instance()->listTree($this->OrgId, $this->Data['MEAL_TYPE']);
 
         app_response(200, $rs);
     }

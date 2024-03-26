@@ -34,7 +34,7 @@ class BaseController extends Controller
         try {
             $param = $this->request->param();
             $this->User = $param['userInfo'] ?? [];
-            $this->OrgId = $param['userInfo']['orgId'] ?? '';
+            $this->OrgId = $param['userInfo']['orgId'] ?? '01';
 
             if (!is_string($param['data'])) {
                 throw new Exception('请求参数异常');
