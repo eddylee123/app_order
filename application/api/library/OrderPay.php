@@ -9,6 +9,8 @@ use think\Request;
 class OrderPay
 {
     const host = "http://10.254.30.36:8080";
+    const payTag = 'payment-notification';
+    const refundTag = 'refund-notification';
 
     /**
      * 支付

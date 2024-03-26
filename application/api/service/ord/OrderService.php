@@ -223,34 +223,21 @@ class OrderService extends BaseService
             app_exception('订单信息异常');
         }
 
-        //用户信息
-        $data = [
-            'openId' => $param['openId'],
-            'title' => 'order',
-            'body' => $main['ORDER_NO'],
-            'payAmt' => $main['PAY_AMT'],
-            'ipAddress' => $param['IP'],
-            'expireSeconds' => 600,
-            'channel' => $param['CHANNEL'],
-            'tradeType' => $param['TRADE_TYPE'],
-            'sourceTag' => 'order',
-        ];
+        return $this->payHandle($param, $main->toArray());
+    }
 
-        try {
-            $resp = OrderPay::pay($data);
-            if ($resp['success'] != true) {
-                app_exception('支付请求失败');
-            }
-            $res = json_decode($resp['data'], true);
-            if (!empty($res['credential'])) {
-                return json_decode($res['credential'], true);
-            }
-
-        } catch (Exception $e) {
-            app_exception($e->getMessage());
+    public function payOrder(array $param)
+    {
+        //订单信息
+        $main = $this->mainModel->where('ORDER_NO', $param['ORDER_NO'])->find();
+        if (empty($main)) {
+            app_exception('订单信息异常');
+        }
+        if ($main['STATE'] != 'WAIT_PAY') {
+            app_exception('系统异常，暂无待支付订单');
         }
 
-        return [];
+        return $this->payHandle($param, $main->toArray());
     }
 
     public function refund(array $param)
@@ -289,6 +276,38 @@ class OrderService extends BaseService
         }
 
         return $param['ORDER_ID'];
+    }
+
+    protected function payHandle(array $param, array $main)
+    {
+        //用户信息
+        $data = [
+            'openId' => $param['openId'],
+            'title' => 'order',
+            'body' => $main['ORDER_NO'],
+            'payAmt' => $main['PAY_AMT'],
+            'ipAddress' => $param['IP'],
+            'expireSeconds' => 600,
+            'channel' => $param['CHANNEL'],
+            'tradeType' => $param['TRADE_TYPE'],
+            'sourceTag' => OrderPay::payTag,
+        ];
+
+        try {
+            $resp = OrderPay::pay($data);
+            if ($resp['success'] != true) {
+                app_exception('支付请求失败');
+            }
+            $res = json_decode($resp['data'], true);
+            if (!empty($res['credential'])) {
+                return json_decode($res['credential'], true);
+            }
+
+        } catch (Exception $e) {
+            app_exception($e->getMessage());
+        }
+
+        return [];
     }
 
 }

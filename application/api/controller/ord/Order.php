@@ -70,6 +70,10 @@ class Order extends BaseController
         app_response(200, $rs);
     }
 
+    /**
+     * 发起支付
+     * DateTime: 2024-03-26 15:48
+     */
     public function pay()
     {
         $validate = new OrderValidate();
@@ -85,6 +89,29 @@ class Order extends BaseController
         app_response(200, $rs);
     }
 
+    /**
+     * 订单号支付
+     * DateTime: 2024-03-26 15:49
+     */
+    public function payOrder()
+    {
+        $validate = new OrderValidate();
+        $result = $validate->scene('payOrder')->check($this->Data);
+        if (!$result) {
+            app_exception($validate->getError());
+        }
+        $this->Data['openId'] = $this->User['openId'] ?? '';
+        $this->Data['IP'] = $this->request->param('ipAddress', '');
+
+        $rs = OrderService::instance()->payOrder($this->Data);
+
+        app_response(200, $rs);
+    }
+
+    /**
+     * 发起退款
+     * DateTime: 2024-03-26 15:49
+     */
     public function refund()
     {
         $validate = new OrderValidate();
