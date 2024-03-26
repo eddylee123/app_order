@@ -8,7 +8,7 @@ use think\Request;
 
 class OrderPay
 {
-    const host = "http://10.254.30.36:8091";
+    const host = "http://10.254.30.36:8080";
 
     /**
      * 支付
