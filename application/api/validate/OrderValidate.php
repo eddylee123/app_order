@@ -64,7 +64,7 @@ class OrderValidate extends Validate
      */
     protected $scene = [
         'settle' => ['ID','NUM'],
-        'pay' => ['ORDER_ID','PAY_AMT','CHANNEL','TRADE_TYPE'],
+        'pay' => ['ORDER_ID','CHANNEL','TRADE_TYPE'],
         'payOrder' => ['ORDER_NO','CHANNEL','TRADE_TYPE'],
         'refund' => ['ORDER_ID','REFUND_AMT','REASON'],
     ];
