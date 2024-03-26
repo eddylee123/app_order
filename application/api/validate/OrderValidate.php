@@ -26,6 +26,7 @@ class OrderValidate extends Validate
         'CHANNEL' => 'require|max:30',
         'TRADE_TYPE' => 'require|max:30',
         'REASON' => 'require|max:100',
+        'MEAL_TYPE' => 'require|max:20',
     ];
 
     /**
@@ -51,6 +52,8 @@ class OrderValidate extends Validate
         'TRADE_TYPE.max'     => '类型不能超过30个字符',
         'REASON.require' => '退款理由必须',
         'REASON.max'     => '退款理由不能超过100个字符',
+        'MEAL_TYPE.require' => '用餐类型必须',
+        'MEAL_TYPE.max'     => '用餐类型不能超过100个字符',
     ];
 
     /**

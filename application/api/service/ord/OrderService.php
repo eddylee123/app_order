@@ -160,24 +160,24 @@ class OrderService extends BaseService
         }
         $payAmt = array_sum(array_column($detail, 'TOTAL_AMT'));
 
-        $mealTime = [
-            'BREAKFAST' =>['06:00:00','10:59:59'],
-            'LUNCH' =>['11:00:00','16:59:59'],
-            'DINNER' =>['17:00:00','21:59:59'],
-            'SNACK' =>['22:00:00','23:59:59'],
-        ];
-        $mealType = '未知';
-        $timestamp = time();
-        foreach ($mealTime as $k=>$v) {
-            [$start, $end] = $v;
-            $startTime = strtotime(date("Y-m-d ".$start, $timestamp));
-            $endTime = strtotime(date("Y-m-d ".$end, $timestamp));
-            if ($startTime <= $timestamp && $timestamp <= $endTime) {
-                $mealType = $k;
-                break;
-            }
-        }
-        $time = date("Y-m-d h:i:s");
+//        $mealTime = [
+//            'BREAKFAST' =>['06:00:00','10:59:59'],
+//            'LUNCH' =>['11:00:00','16:59:59'],
+//            'DINNER' =>['17:00:00','21:59:59'],
+//            'SNACK' =>['22:00:00','23:59:59'],
+//        ];
+//        $mealType = '未知';
+//        $timestamp = time();
+//        foreach ($mealTime as $k=>$v) {
+//            [$start, $end] = $v;
+//            $startTime = strtotime(date("Y-m-d ".$start, $timestamp));
+//            $endTime = strtotime(date("Y-m-d ".$end, $timestamp));
+//            if ($startTime <= $timestamp && $timestamp <= $endTime) {
+//                $mealType = $k;
+//                break;
+//            }
+//        }
+        $time = date("Y-m-d H:i:s");
         $dish1= reset($dish);
         $main = [
             'ORDER_NO' => get_order_no(),
@@ -189,7 +189,7 @@ class OrderService extends BaseService
             'PAY_AMT' => $payAmt,
             'ORDER_AMT' => $payAmt,
             'REMARK' => $param['REMARK'] ?? '',
-            'MEAL_TYPE' => $mealType,
+            'MEAL_TYPE' => $param['MEAL_TYPE'],
             'CODE' => rand_str(32),
             'CREATE_DATE' => $time
         ];
@@ -252,7 +252,7 @@ class OrderService extends BaseService
         $data = [
             'paymentId' => $main['PAYMENT_ID'],
             'refundAmt' => $param['REFUND_AMT'],
-            'sourceTag' => 'order',
+            'sourceTag' => OrderPay::refundTag,
             'refundReason' => $param['REASON'],
         ];
         $resp = OrderPay::refund($data);

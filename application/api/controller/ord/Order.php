@@ -57,6 +57,9 @@ class Order extends BaseController
         if (empty($this->Data['DISH'])) {
             app_exception('请求参数异常');
         }
+        if (empty($this->Data['MEAL_TYPE'])) {
+            app_exception('用餐类型必须');
+        }
         $validate = new OrderValidate();
         foreach ($this->Data['DISH'] as $dish) {
             $result = $validate->scene('settle')->check($dish);
