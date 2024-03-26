@@ -233,9 +233,6 @@ class OrderService extends BaseService
         if (empty($main)) {
             app_exception('订单信息异常');
         }
-        if ($main['STATE'] != 'WAIT_PAY') {
-            app_exception('系统异常，暂无待支付订单');
-        }
 
         return $this->payHandle($param, $main->toArray());
     }
@@ -280,6 +277,18 @@ class OrderService extends BaseService
 
     protected function payHandle(array $param, array $main)
     {
+        if ($main['STATE'] != 'WAIT_PAY') {
+            app_exception('系统异常，暂无待支付订单');
+        }
+        //支付超时判断
+        $conf = $this->configModel->getConf('', 'PAY_CONFIG');
+        $payConf = [
+            "PAY_END_SEC" => $conf['PAY_END_SEC'] ?? 600,
+            "REFUND_END_SEC" => $conf['REFUND_END_SEC'] ?? 600
+        ];
+        if ((time() - strtotime($main['CREATE_DATE'])) > $payConf['PAY_END_SEC']) {
+            app_exception('订单支付超时，请重新下单');
+        }
         //用户信息
         $data = [
             'openId' => $param['openId'],
@@ -287,7 +296,7 @@ class OrderService extends BaseService
             'body' => $main['ORDER_NO'],
             'payAmt' => $main['PAY_AMT'],
             'ipAddress' => $param['IP'],
-            'expireSeconds' => 600,
+            'expireSeconds' => $payConf['PAY_END_SEC'],
             'channel' => $param['CHANNEL'],
             'tradeType' => $param['TRADE_TYPE'],
             'sourceTag' => OrderPay::payTag,
