@@ -42,7 +42,7 @@ class DishesService extends BaseService
         }
 
         $list = $object
-            ->paginate(['list_rows' => $param['page_size'], 'query' => $param['page']])
+            ->paginate(['list_rows' => $param['page_size'], 'page' => $param['page']])
             ->toArray();
 
         $cateIds = array_column($list['data'], 'CATE_ID');

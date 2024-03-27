@@ -65,7 +65,7 @@ class OrderService extends BaseService
 
         $list = $object
             ->order('CREATE_DATE', 'DESC')
-            ->paginate(['list_rows' => $param['page_size'], 'query' => $param['page']])
+            ->paginate(['list_rows' => $param['page_size'], 'page' => $param['page']])
             ->toArray();
         $deList = $userList = [];
         if (!empty($list['data'])) {
