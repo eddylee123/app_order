@@ -263,6 +263,13 @@ class OrderService extends BaseService
             if ($resp['success'] != true) {
                 app_exception('退款请求失败');
             }
+            //退款更新
+            $update = [
+                'STATE' => 'REFUND',
+                'REFUND_AMT' => $param['REFUND_AMT'],
+                'REMARK' => $param['REASON'],
+            ];
+            $rs0 = $main->save($update);
 
             return true;
         } catch (Exception $e) {
