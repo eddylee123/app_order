@@ -322,7 +322,7 @@ class OrderService extends BaseService
             }
             $res = json_decode($resp['data'], true);
             if (!empty($res['credential'])) {
-                $this->mainModel->where('ID',$param['ORDER_ID'])->save(['STATE'=>'PAYING']);
+                $this->mainModel->where('ID',$param['ORDER_ID'])->update(['STATE'=>'PAYING']);
                 return json_decode($res['credential'], true);
             }
 
