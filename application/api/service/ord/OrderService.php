@@ -64,7 +64,7 @@ class OrderService extends BaseService
         }
 
         $list = $object
-            ->order('CREATE_DATE')
+            ->order('CREATE_DATE', 'DESC')
             ->paginate(['list_rows' => $param['page_size'], 'query' => $param['page']])
             ->toArray();
         $deList = $userList = [];
@@ -322,6 +322,7 @@ class OrderService extends BaseService
             }
             $res = json_decode($resp['data'], true);
             if (!empty($res['credential'])) {
+                $this->mainModel->where('ID',$param['ORDER_ID'])->save(['STATE'=>'PAYING']);
                 return json_decode($res['credential'], true);
             }
 
