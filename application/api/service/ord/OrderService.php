@@ -261,7 +261,7 @@ class OrderService extends BaseService
         try {
             $resp = OrderPay::refund($data);
             if ($resp['success'] != true) {
-                app_exception('退款请求失败');
+                app_exception($resp['errorMessage']);
             }
             //退款更新
             $update = [
