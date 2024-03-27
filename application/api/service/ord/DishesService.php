@@ -42,6 +42,7 @@ class DishesService extends BaseService
         }
 
         $list = $object
+            ->order('CREATE_DATE', 'DESC')
             ->paginate(['list_rows' => $param['page_size'], 'page' => $param['page']])
             ->toArray();
 
