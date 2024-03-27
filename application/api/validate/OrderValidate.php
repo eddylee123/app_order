@@ -18,6 +18,7 @@ class OrderValidate extends Validate
     protected $rule = [
         'ID'  => 'require|number',
         'ORDER_ID'  => 'require|number',
+        'ORDER_NO'  => 'require|number',
         'NUM'  => 'require|number',
         'REMARK' => 'max:100',
         'PAY_AMT'  => 'require|number',
@@ -37,8 +38,10 @@ class OrderValidate extends Validate
         'ID.number'     => 'ID格式错误',
         'ORDER_ID.require' => '订单ID必须',
         'ORDER_ID.number'     => '订单ID格式错误',
-        'NUM.require' => '房间ID必须',
-        'NUM.number'     => '房间ID格式错误',
+        'ORDER_NO.require' => '订单号必须',
+        'ORDER_NO.number'     => '订单号格式错误',
+        'NUM.require' => '数量必须',
+        'NUM.number'     => '数量格式错误',
         'REMARK.max'     => '备注不能超过100个字符',
         'STATE.require' => '状态必须',
         'STATE.max'     => '状态不能超过20个字符',
@@ -70,6 +73,7 @@ class OrderValidate extends Validate
         'pay' => ['ORDER_ID','CHANNEL','TRADE_TYPE'],
         'payOrder' => ['ORDER_NO','CHANNEL','TRADE_TYPE'],
         'refund' => ['ORDER_ID','REFUND_AMT','REASON'],
+        'query' => ['ORDER_NO'],
     ];
 
 

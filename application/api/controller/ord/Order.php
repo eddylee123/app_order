@@ -127,4 +127,17 @@ class Order extends BaseController
 
         app_response(200, $rs);
     }
+
+    public function query()
+    {
+        $validate = new OrderValidate();
+        $result = $validate->scene('query')->check($this->Data);
+        if (!$result) {
+            app_exception($validate->getError());
+        }
+
+        $rs = OrderService::instance()->query($this->Data['ORDER_NO']);
+
+        app_response(200, $rs);
+    }
 }

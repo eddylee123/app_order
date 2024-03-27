@@ -275,6 +275,19 @@ class OrderService extends BaseService
         return $param['ORDER_ID'];
     }
 
+    public function query(string $orderNo)
+    {
+        $main = $this->mainModel
+            ->field('ORDER_NO,STATE,PAY_AMT,REFUND_AMT,PAY_DATE,REFUND_DATE,CREATE_DATE SETTLE_DATE,MEAL_TYPE')
+            ->where('ORDER_NO', $orderNo)
+            ->find();
+        if (!$main) {
+            app_exception('订单信息异常');
+        }
+
+        return $main;
+    }
+
     protected function payHandle(array $param, array $main)
     {
         if ($main['STATE'] != 'WAIT_PAY') {
