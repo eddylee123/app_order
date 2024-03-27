@@ -263,22 +263,13 @@ class OrderService extends BaseService
             if ($resp['success'] != true) {
                 app_exception('退款请求失败');
             }
-            $res = json_decode($resp['data'], true);
-            if (!empty($res['credential'])) {
-                //退款更新
-                $update = [
-                    'STATE' => 'REFUND',
-                    'REFUND_AMT' => $param['REFUND_AMT'],
-                    'REMARK' => $param['REASON'],
-                ];
-                $rs0 = $main->save($update);
-                return json_decode($res['credential'], true);
-            }
+
+            return true;
         } catch (Exception $e) {
             app_exception($e->getMessage());
+            return false;
         }
 
-        return [];
     }
 
     public function query(string $orderNo)

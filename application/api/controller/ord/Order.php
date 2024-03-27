@@ -125,7 +125,7 @@ class Order extends BaseController
 
         $rs = OrderService::instance()->refund($this->Data);
 
-        app_response(200, $rs);
+        app_response(200, ['SUCCESS'=>$rs]);
     }
 
     public function query()
