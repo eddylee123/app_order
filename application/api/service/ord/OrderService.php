@@ -223,7 +223,7 @@ class OrderService extends BaseService
             app_exception('订单信息异常');
         }
 
-        return $this->payHandle($param, $main->toArray());
+        return $this->payHandle($main, $param);
     }
 
     public function payOrder(array $param)
@@ -234,7 +234,7 @@ class OrderService extends BaseService
             app_exception('订单信息异常');
         }
 
-        return $this->payHandle($param, $main->toArray());
+        return $this->payHandle($main, $param);
     }
 
     public function refund(array $param)
@@ -243,8 +243,11 @@ class OrderService extends BaseService
         if (empty($main)) {
             app_exception('订单信息异常');
         }
+        if ($main['STATE'] == 'REFUND') {
+            app_exception('订单退款中，请勿重复操作');
+        }
         if ($main['STATE'] != 'PAY_SUCCESS') {
-            app_exception('订单未支付，无法退款');
+            app_exception('订单未支付成功，无法退款');
         }
         if ($param['REFUND_AMT'] > $main['PAY_AMT']) {
             app_exception('退款金额异常');
@@ -255,24 +258,27 @@ class OrderService extends BaseService
             'sourceTag' => OrderPay::refundTag,
             'refundReason' => $param['REASON'],
         ];
-        $resp = OrderPay::refund($data);
-        if ($resp['success'] != true) {
-            app_exception('退款请求失败');
-        }
-        $resData = json_decode($resp['data'], true);
-        //退款更新
-        $update = [
-            'REFUND_ID' => $resData['REFUND_ID'],
-            'STATE' => 'REFUND_SUCCESS',
-            'REFUND_AMT' => $param['REFUND_AMT'],
-            'REMARK' => $param['REASON'],
-        ];
-        $rs0 = $main->save($update);
-        if ($rs0 === false) {
-            app_exception('退款失败');
+        try {
+            $resp = OrderPay::refund($data);
+            if ($resp['success'] != true) {
+                app_exception('退款请求失败');
+            }
+            $res = json_decode($resp['data'], true);
+            if (!empty($res['credential'])) {
+                //退款更新
+                $update = [
+                    'STATE' => 'REFUND',
+                    'REFUND_AMT' => $param['REFUND_AMT'],
+                    'REMARK' => $param['REASON'],
+                ];
+                $rs0 = $main->save($update);
+                return json_decode($res['credential'], true);
+            }
+        } catch (Exception $e) {
+            app_exception($e->getMessage());
         }
 
-        return $param['ORDER_ID'];
+        return [];
     }
 
     public function query(string $orderNo)
@@ -288,7 +294,7 @@ class OrderService extends BaseService
         return $main;
     }
 
-    protected function payHandle(array $param, array $main)
+    protected function payHandle(&$main,array $param)
     {
         if ($main['STATE'] != 'WAIT_PAY') {
             app_exception('系统异常，暂无待支付订单');
@@ -322,7 +328,7 @@ class OrderService extends BaseService
             }
             $res = json_decode($resp['data'], true);
             if (!empty($res['credential'])) {
-                $this->mainModel->where('ID',$param['ORDER_ID'])->update(['STATE'=>'PAYING']);
+                $main->save(['STATE'=>'PAYING']);
                 return json_decode($res['credential'], true);
             }
 

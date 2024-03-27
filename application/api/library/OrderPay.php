@@ -51,7 +51,7 @@ class OrderPay
             'data' => json_encode($param, JSON_UNESCAPED_UNICODE),
         ];
 
-        $rs = curl_request($url, 'POST', $body);;
+        $rs = curl_request($url, 'POST', $body);
 
         $data = [];
         if ($rs) {
