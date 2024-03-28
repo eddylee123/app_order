@@ -2,6 +2,7 @@
 
 namespace app\api\model\ord;
 
+use app\api\library\Oss;
 use think\Model;
 
 /**
@@ -43,5 +44,10 @@ class File Extends Model
         }
 
         return $fileArr;
+    }
+
+    public function getFilePathAttr($value)
+    {
+        return Oss::viewUrl.$value;
     }
 }
