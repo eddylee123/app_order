@@ -130,13 +130,13 @@ class OrderService extends BaseService
     public function settle(int $userId, array $param)
     {
         //去重
-        $exist = $this->mainModel
-            ->where('USER_ID', $userId)
-            ->whereIn('STATE', ['WAIT_PAY','PAYING'])
-            ->value('ID');
-        if ($exist) {
-            app_exception('当前存在未支付订单，请勿重复提交');
-        }
+//        $exist = $this->mainModel
+//            ->where('USER_ID', $userId)
+//            ->whereIn('STATE', ['WAIT_PAY','PAYING'])
+//            ->value('ID');
+//        if ($exist) {
+//            app_exception('当前存在未支付订单，请勿重复提交');
+//        }
         $dishIds = array_column($param['DISH'],'ID');
         $dish = $this->dishesModel
             ->whereIn('ID', $dishIds)
