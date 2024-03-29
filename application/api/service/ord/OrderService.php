@@ -268,6 +268,7 @@ class OrderService extends BaseService
                 'STATE' => 'REFUND',
                 'REFUND_AMT' => $param['REFUND_AMT'],
                 'REMARK' => $param['REASON'],
+                'REFUND_DATE' => date('Y-m-d H:i:s')
             ];
             $rs0 = $main->save($update);
 
@@ -326,7 +327,10 @@ class OrderService extends BaseService
             }
             $res = json_decode($resp['data'], true);
             if (!empty($res['credential'])) {
-                $main->save(['STATE'=>'PAYING']);
+                $main->save([
+                    'STATE'=>'PAYING',
+                    'PAY_DATE' => date('Y-m-d H:i:s')
+                ]);
                 return json_decode($res['credential'], true);
             }
 
