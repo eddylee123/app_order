@@ -128,6 +128,10 @@ class Order extends BaseController
         app_response(200, ['SUCCESS'=>$rs]);
     }
 
+    /**
+     * 订单查询
+     * DateTime: 2024-03-29 15:27
+     */
     public function query()
     {
         $validate = new OrderValidate();
@@ -137,6 +141,23 @@ class Order extends BaseController
         }
 
         $rs = OrderService::instance()->query($this->Data['ORDER_NO']);
+
+        app_response(200, $rs);
+    }
+
+    /**
+     * 核销
+     * DateTime: 2024-03-29 15:27
+     */
+    public function check()
+    {
+        $validate = new OrderValidate();
+        $result = $validate->scene('query')->check($this->Data);
+        if (!$result) {
+            app_exception($validate->getError());
+        }
+
+        $rs = OrderService::instance()->check($this->Data['ORDER_NO']);
 
         app_response(200, $rs);
     }

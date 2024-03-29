@@ -103,8 +103,18 @@ class OrderService extends BaseService
     public function info(int $orderId)
     {
         $order = $this->mainModel
-            ->field('ORDER_NO,STATE,PAY_AMT,ORDER_AMT,MEAL_TYPE,CODE,CHECK,CREATE_DATE')
+            ->field('ORDER_NO,STATE,PAY_AMT,ORDER_AMT,MEAL_TYPE,CODE,CHECK,CREATE_DATE,MARK_DATE')
             ->find($orderId);
+        if (empty($order)) {
+            app_exception('订单数据异常');
+        }
+        //用餐时间
+        $mealDay = !empty($order['MARK_DATE']) ?
+            date('Y.m.d', strtotime($order['MARK_DATE'])) :
+            date('Y.m.d', (strtotime($order['CREATE_DATE']) + 86400));
+        $mealTime = $this->configModel->getConf('','MEAL_TIME');
+        [$start, $end] = $mealTime[$order['MEAL_TYPE']];
+        $order['VALID_TIME'] = $mealDay.' '. $start.'-'.$end;
 
         $detail = $this->detailModel
             ->field('ID,DISH_ID,UNIT_PRICE,DISH_NAME,NUM,TOTAL_AMT')
@@ -191,7 +201,8 @@ class OrderService extends BaseService
             'REMARK' => $param['REMARK'] ?? '',
             'MEAL_TYPE' => $param['MEAL_TYPE'],
             'CODE' => rand_str(32),
-            'CREATE_DATE' => $time
+            'CREATE_DATE' => $time,
+            'MARK_DATE' => date("Y-m-d", strtotime("+1 day"))
         ];
 
         $ordId = $this->mainModel->insertGetId($main);
@@ -338,6 +349,45 @@ class OrderService extends BaseService
         }
 
         return [];
+    }
+
+    /**
+     * 核销
+     * @param string $orderNo
+     * @return mixed
+     * DateTime: 2024-03-29 15:29
+     */
+    public function check(string $orderNo)
+    {
+        $main = $this->mainModel->where('ORDER_NO', $orderNo)->find();
+        if (empty($main)) {
+            app_exception('订单信息异常');
+        }
+        if ($main['STATE'] != 'PAY_SUCCESS') {
+            app_exception('订单未支付成功，无法核销');
+        }
+        if ($main['CHECK'] != 0) {
+            $main['CHECK'] == 1 && app_exception('订单已核销');
+            $main['CHECK'] == 2 && app_exception('订单核销超时');
+        }
+        //用餐时间
+        $mealDay = $main['MARK_DATE'] ?? date('Y-m-d', (strtotime($main['CREATE_DATE']) + 86400));
+        $mealTime = $this->configModel->getConf('','MEAL_TIME');
+        [$start, $end] = $mealTime[$main['MEAL_TYPE']];
+        $startTime = $mealDay.' '.$start;
+        $endTime = $mealDay.' '.$end;
+
+        $timestamp = time();
+        if (strtotime($startTime) <= $timestamp && $timestamp <= strtotime($endTime)) {
+            //核销
+            $rs0 = $main->save(['CHECK'=>1,'CHECK_DATE'=>date('Y-m-d H:i:s')]);
+            if ($rs0 === false) {
+                app_exception('核销失败，请稍后再试');
+            }
+
+            return $orderNo;
+        }
+        app_exception('未在核销时间内，暂无法核销');
     }
 
 }
