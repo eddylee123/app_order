@@ -328,7 +328,6 @@ class OrderService extends BaseService
             $res = json_decode($resp['data'], true);
             if (!empty($res['credential'])) {
                 $main->save([
-                    'STATE'=>'PAYING',
                     'PAY_DATE' => date('Y-m-d H:i:s')
                 ]);
                 return json_decode($res['credential'], true);
