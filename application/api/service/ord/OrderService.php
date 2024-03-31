@@ -202,6 +202,7 @@ class OrderService extends BaseService
             'MEAL_TYPE' => $param['MEAL_TYPE'],
             'CODE' => rand_str(32),
             'CREATE_DATE' => $time,
+            'PAY_DATE' => $time,
             'MARK_DATE' => date("Y-m-d", strtotime("+1 day"))
         ];
 
@@ -338,9 +339,6 @@ class OrderService extends BaseService
             }
             $res = json_decode($resp['data'], true);
             if (!empty($res['credential'])) {
-                $main->save([
-                    'PAY_DATE' => date('Y-m-d H:i:s')
-                ]);
                 return json_decode($res['credential'], true);
             }
 
