@@ -43,6 +43,9 @@ class DishesService extends BaseService
         if (!empty($param['CATE_ID'])) {
             $object->where("CATE_ID", $param['CATE_ID']);
         }
+        if (!empty($param['STATUS'])) {
+            $object->where("STATUS", $param['STATUS']);
+        }
 
         $list = $object
             ->order('CREATE_DATE', 'DESC')
