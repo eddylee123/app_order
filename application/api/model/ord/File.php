@@ -33,7 +33,7 @@ class File Extends Model
 
         $list = $this->alias('f')
             ->join('ord_dishes_file df', 'df.FILE_ID=f.ID')
-            ->field('f.ID,f.FILE_PATH,f.FILE_TYPE,df.DISHES_ID')
+            ->field('f.ID,f.FILE_PATH,f.FILE_PATH FILE_DIR,f.FILE_TYPE,df.DISHES_ID')
             ->whereIn('df.DISHES_ID', $dishesId)
             ->select();
         $list = collection($list)->toArray();
