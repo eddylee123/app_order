@@ -21,6 +21,7 @@ class BaseController extends Controller
     protected $request;
 
     protected $OrgId = '';
+    protected $IsApp = false;
     protected $User = [];
     protected $Data = [];
 
@@ -36,10 +37,13 @@ class BaseController extends Controller
             $this->User = $param['userInfo'] ?? [];
             $this->OrgId = $param['userInfo']['orgCode'] ?? '01';
 
+
             if (!is_string($param['data'])) {
                 throw new Exception('请求参数异常');
             }
-
+            if (!empty($this->User['appId']) && $this->User['appId'] == 'app') {
+                $this->IsApp = true;
+            }
             !empty($param['data']) && $this->Data = json_decode($param['data'], true);
 
         } catch (Exception $e) {

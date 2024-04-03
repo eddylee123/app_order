@@ -24,7 +24,7 @@ class Order extends BaseController
         $this->Data['page'] = $this->Data['page'] ?? 1;
         $this->Data['page_size'] = $this->Data['page_size'] ?? 10;
 
-        if ($this->User['appId'] == 'app') {
+        if ($this->IsApp) {
             //小程序请求
             $rs = OrderService::instance()->lists($this->OrgId, $this->Data, $this->User['userId']);
         } else {

@@ -24,10 +24,13 @@ class DishesService extends BaseService
         $this->dishesFileModel = new DishesFile();
     }
 
-    public function lists(string $orgId, array $param)
+    public function lists(string $orgId, array $param, $app=false)
     {
         $object = $this->dishesModel;
 
+        if ($app) {
+            $object->where("STATUS", 'ON');
+        }
         if (!empty($orgId)) {
             $object->where("ORG_CODE", $orgId);
         }
