@@ -3,9 +3,7 @@ namespace app\cache;
 
 class BaseCache
 {
-    //checkin
-    const base_emp = "base:emp:%s";
+    //order
+    const order_stash = "dishes:order_stash:%s";
 
-    //fee
-    const fee_emp = "fee:emp:%s";
 }

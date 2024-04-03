@@ -74,7 +74,7 @@ class OrderService extends BaseService
             $userList = $this->userModel->whereIn('ID', $userIds)->column('ID,EMP_ID,NICKNAME,MOBILE', 'ID');
             //菜单基础信息
             $orderIds = implode(",", array_column($list['data'], 'ID'));
-            $sql = "SELECT de.ID,de.ORD_ID,de.DISH_NAME,fi.FILE_PATH,fi.FILE_TYPE FROM ord_order_detail de 
+            $sql = "SELECT de.ID,de.ORD_ID,de.DISH_NAME,de.NUM,fi.FILE_PATH,fi.FILE_TYPE FROM ord_order_detail de 
                 LEFT JOIN ord_dishes di ON di.ID=de.DISH_ID 
                 LEFT JOIN ord_dishes_file df ON df.DISHES_ID=di.ID 
                 LEFT JOIN ord_file fi ON fi.ID=df.FILE_ID 
@@ -95,6 +95,7 @@ class OrderService extends BaseService
             $v['NICKNAME'] = $user['NICKNAME'] ?? '';
             $v['MOBILE'] = $user['MOBILE'] ?? '';
             $v['DETAIL'] = $deList[$v['ID']] ?? [];
+            $v['ALL_NUM'] = array_sum(array_column($v['DETAIL'], 'NUM'));
         }
 
         return $list;
@@ -154,7 +155,6 @@ class OrderService extends BaseService
 
         $detail = [];
         foreach ($param['DISH'] as $v) {
-
             if (empty($dish[$v['ID']])) {
                 app_exception('菜单信息异常');
             }
@@ -168,25 +168,8 @@ class OrderService extends BaseService
                 'TOTAL_AMT' => $dishOrd['PRICE'] * $v['NUM']
             ];
         }
+        //存储结算数据
         $payAmt = array_sum(array_column($detail, 'TOTAL_AMT'));
-
-//        $mealTime = [
-//            'BREAKFAST' =>['06:00:00','10:59:59'],
-//            'LUNCH' =>['11:00:00','16:59:59'],
-//            'DINNER' =>['17:00:00','21:59:59'],
-//            'SNACK' =>['22:00:00','23:59:59'],
-//        ];
-//        $mealType = '未知';
-//        $timestamp = time();
-//        foreach ($mealTime as $k=>$v) {
-//            [$start, $end] = $v;
-//            $startTime = strtotime(date("Y-m-d ".$start, $timestamp));
-//            $endTime = strtotime(date("Y-m-d ".$end, $timestamp));
-//            if ($startTime <= $timestamp && $timestamp <= $endTime) {
-//                $mealType = $k;
-//                break;
-//            }
-//        }
         $time = date("Y-m-d H:i:s");
         $dish1= reset($dish);
         $main = [
