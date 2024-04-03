@@ -81,8 +81,8 @@ class DishesService extends BaseService
 
     public function add(string $orgCode, array $param)
     {
-        $fileId = $param['FILE_ID'];
-        unset($param['FILE_ID']);
+        $files = $param['FILES'];
+        unset($param['FILES']);
 
         Db::startTrans();
         try {
@@ -95,19 +95,30 @@ class DishesService extends BaseService
                 throw new Exception('菜谱新增失败');
             }
 
-            if (!empty($fileId)) {
-                $fileArr = explode(',', $fileId);
-                $fileArr = array_map(function ($item) use ($dishesId) {
-                    return [
-                        'FILE_ID' => $item,
+            if (!empty($files)) {
+                $fileArr = explode(',', $files);
+                foreach ($fileArr as $val) {
+                    //图片新增
+                    $fileData = [
+                        'FILE_PATH' => $val,
+                        'FILE_TYPE' => 'PHOTO',
+                        'CREATE_DATE' => $param['CREATE_DATE'],
+                    ];
+                    $fileId = $this->fileModel->insertGetId($fileData);
+                    if (!$fileId) {
+                        throw new Exception('图片新增失败');
+                    }
+                    //关联新增
+                    $line = [
+                        'FILE_ID' => $fileId,
                         'DISHES_ID' => $dishesId,
                     ];
-                }, $fileArr);
-
-                $df = $this->dishesFileModel->saveAll($fileArr);
-                if (!$df) {
-                    throw new Exception('操作失败');
+                    $df = $this->dishesFileModel->insert($line);
+                    if (!$df) {
+                        throw new Exception('操作失败');
+                    }
                 }
+
             }
 
             Db::commit();
