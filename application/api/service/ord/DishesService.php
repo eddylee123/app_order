@@ -139,8 +139,8 @@ class DishesService extends BaseService
         if (!$dishes) {
             app_exception('请求参数异常');
         }
-        $fileId = $param['FILE_ID'];
-        unset($param['FILE_ID']);
+        $files = $param['FILES'];
+        unset($param['FILES']);
 
         Db::startTrans();
         try {
@@ -151,7 +151,7 @@ class DishesService extends BaseService
             }
 
             $dfArr = $this->dishesFileModel->where('DISHES_ID', $dishes['ID'])->column('FILE_ID');
-            $fileArr = explode(',', $fileId);
+            $fileArr = explode(',', $files);
 
             if (array_diff($dfArr, $fileArr)) {
                 $this->dishesFileModel->whereIn('FILE_ID', $dfArr)->delete();

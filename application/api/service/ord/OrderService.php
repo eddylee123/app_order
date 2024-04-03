@@ -127,6 +127,7 @@ class OrderService extends BaseService
         $detail = collection($detail)->toArray();
         $dishIds = array_column($detail, 'DISH_ID');
         $fileList = $this->fileModel->getFile($dishIds);
+        $order['ALL_NUM'] = array_sum(array_column($detail, 'NUM'));
 
         foreach ($detail as &$v) {
             $v['FILE'] = $fileList[$v['DISH_ID']] ?? [];
@@ -181,7 +182,6 @@ class OrderService extends BaseService
             'STATE' => 'WAIT_PAY',
             'PAY_AMT' => $payAmt,
             'ORDER_AMT' => $payAmt,
-            'REMARK' => $param['REMARK'] ?? '',
             'MEAL_TYPE' => $param['MEAL_TYPE'],
             'CODE' => rand_str(32),
             'CREATE_DATE' => $time,
@@ -322,6 +322,8 @@ class OrderService extends BaseService
             }
             $res = json_decode($resp['data'], true);
             if (!empty($res['credential'])) {
+                //更新订单
+                $main->save(['REMARK' => $param['REMARK'] ?? '']);
                 return json_decode($res['credential'], true);
             }
 
