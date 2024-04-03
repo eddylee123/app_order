@@ -22,4 +22,13 @@ class Category extends BaseController
 
         app_response(200, $rs);
     }
+
+    public function lists()
+    {
+        $this->Data['page'] = $this->Data['page'] ?? 1;
+        $this->Data['page_size'] = $this->Data['page_size'] ?? 999;
+        $rs = CategoryService::instance()->lists($this->OrgId, $this->Data);
+
+        app_response(200, $rs);
+    }
 }

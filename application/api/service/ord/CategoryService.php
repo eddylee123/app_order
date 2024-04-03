@@ -4,6 +4,7 @@ namespace app\api\service\ord;
 
 use app\api\model\ord\Category;
 use app\api\service\BaseService;
+use function fast\e;
 
 class CategoryService extends BaseService
 {
@@ -17,6 +18,22 @@ class CategoryService extends BaseService
     public function listTree(string $orgId, string $mealType)
     {
         return $this->cateModel->getCateTree($orgId, $mealType);
+    }
+
+    public function lists(string $orgId, array $param)
+    {
+        $object =  $this->cateModel
+            ->field('ID,PID,NAME')
+            ->where('ORG_CODE', $orgId)
+            ->where('STATUS', "ON");
+
+        if (!empty($param['NAME'])) {
+            $object->where("NAME", "like", "%".$param['NAME']."%");
+        }
+        if (isset($param['PID'])) {
+            $object->where("PID", $param['PID']);
+        }
+        return $object->order('SEQ', 'desc')->select();
     }
 
     public function info(int $id)
