@@ -144,27 +144,43 @@ class DishesService extends BaseService
 
         Db::startTrans();
         try {
-
             $rs0 = $dishes->save($param);
             if ($rs0 === false) {
                 throw new Exception('菜谱更新失败');
             }
 
-            $dfArr = $this->dishesFileModel->where('DISHES_ID', $dishes['ID'])->column('FILE_ID');
-            $fileArr = explode(',', $files);
+            //更新图片
+            $fileArr = $this->dishesFileModel
+                ->alias('df')
+                ->join('ord_file f', 'f.ID=df.FILE_ID')
+                ->where('DISHES_ID', $dishes['ID'])->column('FILE_ID');
 
-            if (array_diff($dfArr, $fileArr)) {
-                $this->dishesFileModel->whereIn('FILE_ID', $dfArr)->delete();
-                $fileArr = array_map(function ($item) use ($dishes) {
-                    return [
-                        'FILE_ID' => $item,
+            //删除原图
+            $this->fileModel->whereIn('ID', $fileArr)->delete();
+            $this->dishesFileModel->whereIn('FILE_ID', $fileArr)->delete();
+            $time = date('Y-m-d h:i:s');
+            if (!empty($files)) {
+                $fileArr = explode(',', $files);
+                foreach ($fileArr as $val) {
+                    //图片新增
+                    $fileData = [
+                        'FILE_PATH' => $val,
+                        'FILE_TYPE' => 'PHOTO',
+                        'CREATE_DATE' => $time,
+                    ];
+                    $fileId = $this->fileModel->insertGetId($fileData);
+                    if (!$fileId) {
+                        throw new Exception('图片新增失败');
+                    }
+                    //关联新增
+                    $line = [
+                        'FILE_ID' => $fileId,
                         'DISHES_ID' => $dishes['ID'],
                     ];
-                }, $fileArr);
-
-                $df = $this->dishesFileModel->saveAll($fileArr);
-                if (!$df) {
-                    throw new Exception('操作失败');
+                    $df = $this->dishesFileModel->insert($line);
+                    if (!$df) {
+                        throw new Exception('操作失败');
+                    }
                 }
             }
 
