@@ -27,17 +27,6 @@ class Category Extends Model
         'OFF' => '关闭'
     ];
 
-    public function getCateTree(string $orgId, string $mealType)
-    {
-        $list = $this
-            ->where('ORG_CODE', $orgId)
-            ->where('MEAL_TYPE', $mealType)
-            ->where('STATUS', "ON")
-            ->order('SEQ', 'desc')
-            ->column('ID,PID,NAME');
-
-        return get_tree($list);
-    }
 
 
 }

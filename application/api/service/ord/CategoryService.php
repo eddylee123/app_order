@@ -15,17 +15,27 @@ class CategoryService extends BaseService
         $this->cateModel = new Category();
     }
 
-    public function listTree(string $orgId, string $mealType)
+    public function listTree(string $orgId, string $mealType, bool $isApp=false)
     {
-        return $this->cateModel->getCateTree($orgId, $mealType);
+        $object = $this->cateModel
+            ->where('ORG_CODE', $orgId)
+            ->where('MEAL_TYPE', $mealType);
+
+        if ($isApp) {
+            $object->where('STATUS', "ON");
+        }
+
+        $list = $object->order('SEQ', 'desc')->column('ID,PID,NAME');
+
+        return get_tree($list);
+
     }
 
     public function lists(string $orgId, array $param)
     {
         $object =  $this->cateModel
             ->field('ID,PID,NAME')
-            ->where('ORG_CODE', $orgId)
-            ->where('STATUS', "ON");
+            ->where('ORG_CODE', $orgId);
 
         if (!empty($param['NAME'])) {
             $object->where("NAME", "like", "%".$param['NAME']."%");

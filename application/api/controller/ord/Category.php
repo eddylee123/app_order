@@ -18,7 +18,11 @@ class Category extends BaseController
         if (empty($this->Data['MEAL_TYPE'])) {
             $this->Data['MEAL_TYPE'] = 'LUNCH';
         }
-        $rs = CategoryService::instance()->listTree($this->OrgId, $this->Data['MEAL_TYPE']);
+        if ($this->IsApp) {
+            $rs = CategoryService::instance()->listTree($this->OrgId, $this->Data['MEAL_TYPE'], true);
+        } else {
+            $rs = CategoryService::instance()->listTree($this->OrgId, $this->Data['MEAL_TYPE']);
+        }
 
         app_response(200, $rs);
     }
