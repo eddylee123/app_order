@@ -50,12 +50,14 @@ class DishesService extends BaseService
             ->toArray();
 
         $cateIds = array_column($list['data'], 'CATE_ID');
-        $cateList = $this->cateModel->whereIn('ID', $cateIds)->column('NAME', 'ID');
+        $cateList = $this->cateModel->whereIn('ID', $cateIds)->column('NAME,MEAL_TYPE', 'ID');
         $dishIds = array_column($list['data'], 'ID');
         $fileList = $this->fileModel->getFile($dishIds);
 
         foreach ($list['data'] as &$v) {
-            $v['CATE_NAME'] = $cateList[$v['CATE_ID']] ?? '';
+            $cate = $cateList[$v['CATE_ID']] ?? [];
+            $v['CATE_NAME'] = $cate['NAME'] ?? '';
+            $v['MEAL_TYPE'] = $cate['MEAL_TYPE'] ?? '';
             $v['FILE'] = $fileList[$v['ID']] ?? [];
         }
 
