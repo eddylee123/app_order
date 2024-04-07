@@ -2,7 +2,7 @@
 
 namespace app\api\model\ord;
 
-use app\api\library\Oss;
+use think\Env;
 use think\Model;
 
 /**
@@ -48,6 +48,6 @@ class File Extends Model
 
     public function getFilePathAttr($value)
     {
-        return Oss::viewUrl.$value;
+        return Env::get('redis.viewhost', '').$value;
     }
 }

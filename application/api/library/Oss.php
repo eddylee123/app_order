@@ -6,7 +6,6 @@ use OSS\OssClient;
 
 class Oss
 {
-    const viewUrl = "https://kwwhrp.kwwict.com:10214/oss";
 
     public static function upload($fileName, $filePath)
     {

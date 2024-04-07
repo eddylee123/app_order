@@ -301,17 +301,16 @@ return [
     'api_url'               => 'https://api.fastadmin.net',
     ],
     'p_key'=>'qAp1kU8xYT9URFOq',
-    'redis_master'=>[
-        'hostname'=>'10.254.30.16',
-        'hostport'=>'6379',
-        'password'=>'XgD4LbC5wiJfIu8CbjBuT0hJt0CWL*rU',
+    'redis_master' => [
+        'hostname' => Env::get('redis.hostname', '10.254.30.16'),
+        'hostport' => Env::get('redis.hostport', '6379'),
+        'password' => Env::get('redis.password', ''),
     ],
     //oss
     'oss' => [
-        'endpoint' => 'minio-api.kwwsp.xyz',
-        'ossKeyId' => 'rzwxmgBTMbk3R5wJMceS',
-        'ossKeySecret' => 'Eae4wicfYAzDpgX7CA0uBzDo68RKP0JEZOjNCs5R',
-        'bucket' => 'testapp',
-        'host' => '',
+        'endpoint' => Env::get('redis.endpoint', ''),
+        'ossKeyId' => Env::get('redis.ossKeyId', ''),
+        'ossKeySecret' => Env::get('redis.ossKeySecret', ''),
+        'bucket' => Env::get('oss.bucket', ''),
     ],
 ];
