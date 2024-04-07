@@ -48,6 +48,6 @@ class File Extends Model
 
     public function getFilePathAttr($value)
     {
-        return Env::get('redis.viewhost', '').$value;
+        return Env::get('oss.viewhost', '').$value;
     }
 }
