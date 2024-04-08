@@ -4,14 +4,19 @@
 namespace app\api\library;
 
 
+use think\Env;
 use think\Request;
 
 class OrderPay
 {
-    const host = "http://10.254.30.36:8080";
+//    const host = "http://10.254.30.36:8080";
     const payTag = 'order-payment';
     const refundTag = 'order-refund';
 
+    public static function host()
+    {
+        return Env::get('payment.host');
+    }
     /**
      * 支付
      * @param array $param
@@ -19,7 +24,7 @@ class OrderPay
      */
     public static function pay(array $param)
     {
-        $url = self::host.'/as/payment/pay';
+        $url = self::host().'/as/payment/pay';
 
         $body = [
             'traceId' => Request::instance()->param('traceId', ''),
@@ -44,7 +49,7 @@ class OrderPay
      */
     public static function refund(array $param)
     {
-        $url = self::host.'/as/payment/refund';
+        $url = self::host().'/as/payment/refund';
         $body = [
             'traceId' => Request::instance()->param('traceId', ''),
             'ipAddress' => Request::instance()->param('ipAddress', ''),
@@ -68,7 +73,7 @@ class OrderPay
      */
     public static function query(array $param)
     {
-        $url = self::host.'/as/payment/query';
+        $url = self::host().'/as/payment/query';
         $body = [
             'traceId' => Request::instance()->param('traceId', ''),
             'ipAddress' => Request::instance()->param('ipAddress', ''),
