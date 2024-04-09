@@ -308,9 +308,9 @@ return [
     ],
     //oss
     'oss' => [
-        'endpoint' => Env::get('redis.endpoint', ''),
-        'ossKeyId' => Env::get('redis.ossKeyId', ''),
-        'ossKeySecret' => Env::get('redis.ossKeySecret', ''),
+        'endpoint' => Env::get('oss.endpoint', ''),
+        'ossKeyId' => Env::get('oss.ossKeyId', ''),
+        'ossKeySecret' => Env::get('oss.ossKeySecret', ''),
         'bucket' => Env::get('oss.bucket', ''),
     ],
 ];
