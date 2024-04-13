@@ -916,7 +916,7 @@ function logs_write_cli($str , $line=__LINE__, $filename='order_cli'){
     else{
         $str1 = $str;
     }
-    $dir = '/application/data/app_order/runtime/log_cli/'.date('Ym').'/';
+    $dir = ROOT_PATH.'/runtime/log_cli/'.date('Ym').'/';
     is_dir($dir) OR mkdir($dir, 0777, true);
     $file = fopen( $dir. $filename . date('d') .'.log', 'a+'); // a模式就是一种追加模式，如果是w模式则会删除之前的内容再添加
     fwrite($file, date('H:i:s'). ' '. $str1 . ",line$line\r\n");

@@ -23,7 +23,7 @@ class OrdService extends BaseService
      */
     public function saveOrder(string $body)
     {
-//        logs_write_cli($body, __LINE__);
+        logs_write_cli($body, __LINE__);
         $data = json_decode($body, true);
         if (!is_array($data)) {
             return 0;
