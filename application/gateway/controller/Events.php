@@ -15,7 +15,7 @@ class Events
     public static function onWorkerStart($worker)
     {
         //订单清空
-        Timer::add(3600, function () {
+        Timer::add(60, function () {
             (new OrdService())->clearOrder();
         });
     }
