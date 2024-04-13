@@ -21,7 +21,7 @@ if(!extension_loaded('posix'))
 }
 // 定义应用目录
 define('APP_PATH', __DIR__ . '/../application/');
-define('ROOT_PATH', dirname(realpath(APP_PATH)) . DS);
+define('ROOT_PATH', dirname(realpath(APP_PATH)) . '/');
 // 绑定模块
 define('BIND_MODULE','gateway/Start');
 
