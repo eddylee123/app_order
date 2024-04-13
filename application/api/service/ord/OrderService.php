@@ -170,9 +170,9 @@ class OrderService extends BaseService
                 ->alias('om')
                 ->join('ord_order_detail od','od.ORD_ID=om.ID')
                 ->where('od.DISH_ID', $dishOrd['ID'])
-                ->whereIn('om.STATE', ['PAY_SUCCESS','REFUND','REFUND_SUCCESS','REFUND_FAIL'])
+                ->whereNotIn('om.STATE', ['PAY_FAIL'])
                 ->whereBetween('om.CREATE_DATE', [$ordS, $ordE])
-                ->sum('NUM');
+                ->sum('od.NUM');
             if (($numAll + $v['NUM']) > $dishOrd['STOCK_PER_DAY']) {
                 app_exception('商品库存不足');
             }
