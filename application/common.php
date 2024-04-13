@@ -901,3 +901,26 @@ function curl_request($url, $method = '', $data = '', $header = [], $json=true)
     return $result;
 }
 
+function logs_write_cli($str , $line=__LINE__, $filename='order_cli'){
+    if (empty($str)) {
+        return '';
+    }
+    if(is_array($str)){
+        if(defined("JSON_UNESCAPED_UNICODE")){
+            $str1 = json_encode($str , JSON_UNESCAPED_UNICODE);
+        }
+        else{
+            $str1 = json_encode($str);
+        }
+    }
+    else{
+        $str1 = $str;
+    }
+    $dir = '/application/data/app_order/runtime/log_cli/'.date('Ym').'/';
+    is_dir($dir) OR mkdir($dir, 0777, true);
+    $file = fopen( $dir. $filename . date('d') .'.log', 'a+'); // a模式就是一种追加模式，如果是w模式则会删除之前的内容再添加
+    fwrite($file, date('H:i:s'). ' '. $str1 . ",line$line\r\n");
+    //fwrite($file, $str1 . "\r\n");
+    fclose($file);
+}
+

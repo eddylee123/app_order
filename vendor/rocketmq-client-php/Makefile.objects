@@ -1,0 +1,48 @@
+batch_message.lo: /application/data/dor_manager/vendor/rocketmq-client-php/batch_message.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/batch_message.c -o batch_message.lo 
+common.lo: /application/data/dor_manager/vendor/rocketmq-client-php/common.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/common.c -o common.lo 
+consume_from_where.lo: /application/data/dor_manager/vendor/rocketmq-client-php/consume_from_where.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/consume_from_where.c -o consume_from_where.lo 
+consume_status.lo: /application/data/dor_manager/vendor/rocketmq-client-php/consume_status.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/consume_status.c -o consume_status.lo 
+e_log_level.lo: /application/data/dor_manager/vendor/rocketmq-client-php/e_log_level.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/e_log_level.c -o e_log_level.lo 
+message.lo: /application/data/dor_manager/vendor/rocketmq-client-php/message.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/message.c -o message.lo 
+message_ext.lo: /application/data/dor_manager/vendor/rocketmq-client-php/message_ext.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/message_ext.c -o message_ext.lo 
+message_model.lo: /application/data/dor_manager/vendor/rocketmq-client-php/message_model.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/message_model.c -o message_model.lo 
+message_queues.lo: /application/data/dor_manager/vendor/rocketmq-client-php/message_queues.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/message_queues.c -o message_queues.lo 
+mq_exception.lo: /application/data/dor_manager/vendor/rocketmq-client-php/mq_exception.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/mq_exception.c -o mq_exception.lo 
+producer.lo: /application/data/dor_manager/vendor/rocketmq-client-php/producer.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/producer.c -o producer.lo 
+pull_consumer.lo: /application/data/dor_manager/vendor/rocketmq-client-php/pull_consumer.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/pull_consumer.c -o pull_consumer.lo 
+pull_result.lo: /application/data/dor_manager/vendor/rocketmq-client-php/pull_result.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/pull_result.c -o pull_result.lo 
+pull_status.lo: /application/data/dor_manager/vendor/rocketmq-client-php/pull_status.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/pull_status.c -o pull_status.lo 
+push_consumer.lo: /application/data/dor_manager/vendor/rocketmq-client-php/push_consumer.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/push_consumer.c -o push_consumer.lo 
+push_status.lo: /application/data/dor_manager/vendor/rocketmq-client-php/push_status.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/push_status.c -o push_status.lo 
+rocketmq_client_php.lo: /application/data/dor_manager/vendor/rocketmq-client-php/rocketmq_client_php.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/rocketmq_client_php.c -o rocketmq_client_php.lo 
+send_result.lo: /application/data/dor_manager/vendor/rocketmq-client-php/send_result.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/send_result.c -o send_result.lo 
+send_status.lo: /application/data/dor_manager/vendor/rocketmq-client-php/send_status.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/send_status.c -o send_status.lo 
+trace_model.lo: /application/data/dor_manager/vendor/rocketmq-client-php/trace_model.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/trace_model.c -o trace_model.lo 
+transaction_status.lo: /application/data/dor_manager/vendor/rocketmq-client-php/transaction_status.c
+	$(LIBTOOL) --mode=compile $(CC)  -I. -I/application/data/dor_manager/vendor/rocketmq-client-php $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /application/data/dor_manager/vendor/rocketmq-client-php/transaction_status.c -o transaction_status.lo 
+$(phplibdir)/rocketmq_client_php.la: ./rocketmq_client_php.la
+	$(LIBTOOL) --mode=install cp ./rocketmq_client_php.la $(phplibdir)
+
+./rocketmq_client_php.la: $(shared_objects_rocketmq_client_php) $(ROCKETMQ_CLIENT_PHP_SHARED_DEPENDENCIES)
+	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS)  -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_rocketmq_client_php) $(ROCKETMQ_CLIENT_PHP_SHARED_LIBADD)
+
