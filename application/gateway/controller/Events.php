@@ -2,7 +2,7 @@
 
 namespace app\gateway\controller;
 
-use app\api\service\app_order\OrderService;
+use app\api\service\queue\OrdService;
 use Workerman\Lib\Timer;
 
 
@@ -15,9 +15,8 @@ class Events
     public static function onWorkerStart($worker)
     {
         //订单清空
-        $orderSer = new OrderService();
-        Timer::add(3600, function () use ($orderSer){
-            $orderSer->clearOrder();
+        Timer::add(3600, function () {
+            (new OrdService())->clearOrder();
         });
     }
 
