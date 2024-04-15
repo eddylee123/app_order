@@ -1,4 +1,5 @@
 <?php
+
 namespace app\gateway\controller;
 
 use app\api\library\OrderMq;
@@ -55,5 +56,5 @@ class Daemon
         }
     }
 }
-$deamon = new Daemon();
-$deamon->run($argv);
+//$deamon = new Daemon();
+//$deamon->run($argv);
