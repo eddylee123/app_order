@@ -3,6 +3,7 @@
 namespace app\gateway\controller;
 
 use app\api\library\OrderMq;
+use app\api\service\queue\OrdService;
 use RocketMQ\PushConsumer;
 
 class Daemon
@@ -43,8 +44,12 @@ class Daemon
         $pushConsumer->subscribe("payment-notification", "order-payment");
         $pushConsumer->setThreadCount(1);
         $pushConsumer->registerCallback(function($consumer, $messageExt){
-            echo "[message_ext.message_id] --> " . $messageExt->getMessageBody() . "\n";
-            return 0;
+            if (!empty($messageExt->getMessageBody())) {
+                return (new OrdService())->saveOrder($messageExt->getMessageBody());
+            }
+//            echo "[message_ext.message_id] --> " . $messageExt->getMessageBody() . "\n";
+//            return 0;
+
         });
 
         $pushConsumer->start();
