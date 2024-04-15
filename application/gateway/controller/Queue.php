@@ -43,7 +43,7 @@ class Queue
      */
     public static function onClose($client_id)
     {
-        //订阅队列
+        //断开队列队列
         (new OrderMq())->consumerOver();
     }
 
