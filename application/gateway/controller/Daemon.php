@@ -9,6 +9,9 @@ class Daemon
     public function __construct()
     {
         $this->pidfile = dirname(__FILE__).'/daemon_queue.pid';
+        $deamon = new Daemon();
+        $argv = getopt('a');
+        $deamon->run($argv['a']);
     }
 
     private function startDeamon() {
@@ -56,5 +59,4 @@ class Daemon
         }
     }
 }
-//$deamon = new Daemon();
-//$deamon->run($argv);
+
