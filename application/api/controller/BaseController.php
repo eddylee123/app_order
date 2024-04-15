@@ -34,6 +34,9 @@ class BaseController extends Controller
 
         try {
             $param = $this->request->param();
+            if (!isset($param['userInfo'])){
+                $this->IsApp = true;
+            }
             $this->User = $param['userInfo'] ?? [];
             $this->OrgId = $param['userInfo']['orgCode'] ?? '01';
 
