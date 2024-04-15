@@ -105,4 +105,10 @@ class OrderMq
         }
     }
 
+    public function consumerOver()
+    {
+        $consumer = new PushConsumer(self::instancePay);
+        $consumer->shutdown();
+    }
+
 }
