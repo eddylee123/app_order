@@ -5,6 +5,7 @@ use app\api\library\OrderPay;
 use app\api\model\ord\Config;
 use app\api\model\order\OrderMain;
 use app\api\service\BaseService;
+use think\Exception;
 
 class OrdService extends BaseService
 {
@@ -23,42 +24,46 @@ class OrdService extends BaseService
      */
     public function saveOrder(string $body)
     {
-        $data = json_decode($body, true);
-        if (!is_array($data)) {
+        try {
+            $data = json_decode($body, true);
+            if (!is_array($data)) {
+                return 0;
+            }
+            //logs_write_cli($body, __LINE__);
+            $flag = isset($data['refundId']) ? 'refund' : 'pay';
+
+            if ($flag == 'refund') {
+                //退款
+                $main = $this->orderModel->where('PAYMENT_ID', $data['orderId'])->find();
+                if (!$main) {
+                    return 0;
+                }
+                if ($main['STATE'] != 'REFUND') {
+                    return 0;
+                }
+                $rs = $main->save([
+                    'STATE' => $data['tradeState'] == 'SUCCESS' ? 'REFUND_SUCCESS' : 'REFUND_FAIL',
+                    'REFUND_ID' => $data['refundId'] ?? ''
+                ]);
+            } else {
+                //支付
+                $main = $this->orderModel->where('ORDER_NO', $data['body'])->find();
+                if (!$main) {
+                    return 0;
+                }
+                if ($main['STATE'] != 'WAIT_PAY') {
+                    return 0;
+                }
+                $rs = $main->save([
+                    'STATE' => $data['tradeState'] == 'SUCCESS' ? 'PAY_SUCCESS' : 'PAY_FAIL',
+                    'PAYMENT_ID' => $data['orderId'] ?? ''
+                ]);
+            }
+            if ($rs === false) {
+                return 1;
+            }
+        } catch (Exception $e) {
             return 0;
-        }
-        //logs_write_cli($body, __LINE__);
-        $flag = isset($data['refundId']) ? 'refund' : 'pay';
-        
-        if ($flag == 'refund') {
-            //退款
-            $main = $this->orderModel->where('PAYMENT_ID', $data['orderId'])->find();
-            if (!$main) {
-                return 0;
-            }
-            if ($main['STATE'] != 'REFUND') {
-                return 0;
-            }
-            $rs = $main->save([
-                'STATE' => $data['tradeState'] == 'SUCCESS' ? 'REFUND_SUCCESS' : 'REFUND_FAIL',
-                'REFUND_ID' => $data['refundId'] ?? ''
-            ]);
-        } else {
-            //支付
-            $main = $this->orderModel->where('ORDER_NO', $data['body'])->find();
-            if (!$main) {
-                return 0;
-            }
-            if ($main['STATE'] != 'WAIT_PAY') {
-                return 0;
-            }
-            $rs = $main->save([
-                'STATE' => $data['tradeState'] == 'SUCCESS' ? 'PAY_SUCCESS' : 'PAY_FAIL',
-                'PAYMENT_ID' => $data['orderId'] ?? ''
-            ]);
-        }
-        if ($rs === false) {
-            return 1;
         }
 
         return 0;
