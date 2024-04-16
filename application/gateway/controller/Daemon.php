@@ -47,12 +47,11 @@ class Daemon
         $pushConsumer->subscribe("payment-notification", "order-payment");
         $pushConsumer->setThreadCount(1);
         $pushConsumer->registerCallback(function($consumer, $messageExt){
-            if (!empty($messageExt->getMessageBody())) {
-                return $this->orderService->saveOrder($messageExt->getMessageBody());
-            }
-//            echo "[message_ext.message_id] --> " . $messageExt->getMessageBody() . "\n";
-//            return 0;
-
+//            if (!empty($messageExt->getMessageBody())) {
+//                return $this->orderService->saveOrder($messageExt->getMessageBody());
+//            }
+            echo "[message_ext.message_id] --> " . $messageExt->getMessageBody() . "\n";
+            return 0;
         });
 
         $pushConsumer->start();
