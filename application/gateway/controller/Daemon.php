@@ -8,10 +8,13 @@ use RocketMQ\PushConsumer;
 
 class Daemon
 {
+
+    protected $pidfile;
+    protected $orderService;
     public function __construct()
     {
         $this->pidfile = dirname(__FILE__).'/daemon_queue.pid';
-
+        $this->orderService = new OrdService();
     }
 
     private function startDeamon() {
@@ -45,7 +48,7 @@ class Daemon
         $pushConsumer->setThreadCount(1);
         $pushConsumer->registerCallback(function($consumer, $messageExt){
             if (!empty($messageExt->getMessageBody())) {
-                return (new OrdService())->saveOrder($messageExt->getMessageBody());
+                return $this->orderService->saveOrder($messageExt->getMessageBody());
             }
 //            echo "[message_ext.message_id] --> " . $messageExt->getMessageBody() . "\n";
 //            return 0;
