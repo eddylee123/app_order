@@ -43,6 +43,8 @@ class Queue
      */
     public static function onClose($client_id)
     {
+        //断开队列队列
+        (new OrderMq())->consumerOver();
     }
 
     /**
@@ -54,16 +56,6 @@ class Queue
     public static function onError($client_id, $code, $msg)
     {
         echo "error $code $msg\n";
-    }
-
-    /**
-     * 向客户端发送数据
-     * @param $device_code
-     * @param $reqData
-     * @return array
-     */
-    public static function sendMessage($device_code, $reqData)
-    {
     }
 
 

@@ -105,4 +105,14 @@ class OrderMq
         }
     }
 
+    /**
+     * 断开队列
+     * DateTime: 2024-04-15 22:04
+     */
+    public function consumerOver()
+    {
+        $consumer = new PushConsumer(self::instancePay);
+        $consumer->shutdown();
+    }
+
 }
