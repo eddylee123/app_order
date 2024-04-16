@@ -27,7 +27,7 @@ class OrdService extends BaseService
         if (!is_array($data)) {
             return 0;
         }
-        logs_write_cli($body, __LINE__);
+        //logs_write_cli($body, __LINE__);
         $flag = isset($data['refundId']) ? 'refund' : 'pay';
         
         if ($flag == 'refund') {
