@@ -3,7 +3,7 @@
 namespace app\gateway\controller;
 
 use app\api\library\OrderMq;
-
+use Workerman\Lib\Timer;
 
 class Queue
 {
@@ -14,7 +14,13 @@ class Queue
     public static function onWorkerStart($worker)
     {
         //订阅队列
-        (new OrderMq())->consumer();
+//        (new OrderMq())->consumer();
+
+        $mq = new OrderMq();
+        $mq->consumerInit();
+        Timer::add(3, function () use ($mq) {
+            $mq->consumer2();
+        });
     }
 
     /**

@@ -21,6 +21,10 @@ class OrderMq
 
 //    protected $orderService;
     protected $orderModel;
+    protected $body;
+    protected $data;
+    protected $main;
+    protected $con = null;
     public function __construct()
     {
 //        $this->orderService = new OrdService();
@@ -31,52 +35,6 @@ class OrderMq
     {
         return Env::get('rocketmq.nameserver', '');
     }
-
-//    public static function producer()
-//    {
-//        $tag = '*';
-//        $producer = new  Producer(self::instanceName);
-//        $producer->setInstanceName(self::instanceName);
-//        $producer->setNamesrvAddr(self::nameserver);
-//        $producer->start();
-//
-//        $message = new Message(self::topicPay, $tag, "hello world");
-//        $sendResult = $producer->send($message);
-//
-//        return $sendResult->getSendStatus();
-//    }
-
-//    public static function pullConsumer()
-//    {
-//        $consumer = new PullConsumer("GID_AS-final-state-infer");
-//        $consumer->setGroup("GID_AS-final-state-infer");
-//        $consumer->setInstanceName("GID_AS-final-state-infer");
-//        $consumer->setTopic(self::topicPay);
-//        $consumer->setNamesrvAddr(self::nameserver);
-//
-//        $consumer->start();
-//        $queues = $consumer->getQueues();
-//
-//        foreach($queues as $queue){
-//            $newMsg = true;
-//            $offset = 0;
-//            while($newMsg){
-//                $pullResult = $consumer->pull($queue, "*", $offset, 8);
-//
-//                switch ($pullResult->getPullStatus()){
-//                    case PullStatus::FOUND:
-//                        foreach($pullResult as $key => $val){
-//                            echo $val->getMessage()->getBody() . "\n";
-//                        }
-//                        $offset += count($pullResult);
-//                        break;
-//                    default:
-//                        $newMsg = false;
-//                        break;
-//                }
-//            }
-//        }
-//    }
 
     /**
      * 订阅消费队列
@@ -92,28 +50,49 @@ class OrderMq
         $consumer->subscribe(self::topicPay, self::tagPay);
         $consumer->subscribe(self::topicRefund, self::tagRefund);
         $consumer->registerCallback(function($consumer, $messageExt){
-          if (!empty($messageExt->getMessageBody())) {
-              //echo $messageExt->getMessageBody();
-              //return 0;
-
-                return $this->saveOrder($messageExt->getMessageBody());
-          }
+            if (!empty($messageExt->getMessageBody())) {
+                echo $messageExt->getMessageBody();
+                return 0;
+                //$this->body = $messageExt->getMessageBody();
+                /*$rs = $this->saveOrder($messageExt->getMessageBody());
+                var_dump($rs);
+                return $rs;*/
+            }
         });
-        static $common_model_db;
-        if(!$common_model_db){
+        //static $common_model_db;
+        //if(!$common_model_db){
         $consumer->start();
-        //$consumer->shutdown();
-        }
+        $consumer->shutdown();
+        //}
     }
 
-    /**
-     * 断开队列
-     * DateTime: 2024-04-15 22:04
-     */
-    public function consumerOver()
+    public function consumerInit()
     {
-        $consumer = new PushConsumer(self::instancePay);
-        $consumer->shutdown();
+        $this->con = new PushConsumer(self::instancePay);
+        $this->con->setNameServerAddress(self::nameserver());
+        $this->con->setThreadCount(1);
+        $this->con->setMessageModel(MessageModel::CLUSTERING);
+        //$consumer->setConsumeFromWhere(ConsumeFromWhere::CONSUME_FROM_FIRST_OFFSET);
+        $this->con->subscribe(self::topicPay, self::tagPay);
+        $this->con->subscribe(self::topicRefund, self::tagRefund);
+
+        return;
+    }
+    public function consumer2()
+    {
+        $this->con->registerCallback(function($consumer, $messageExt){
+            if (!empty($messageExt->getMessageBody())) {
+                //echo $messageExt->getMessageBody();
+                //return 0;
+                $this->body = $messageExt->getMessageBody();
+                return $this->saveOrder();
+            }
+        });
+
+        $this->con->start();
+        $this->con->shutdown();
+
+        return;
     }
 
 
@@ -123,50 +102,50 @@ class OrderMq
      * @return int
      * DateTime: 2024-03-29 15:47
      */
-    public function saveOrder(string $body)
+    public function saveOrder()
     {
-        try {
-            $data = json_decode($body, true);
-            if (!is_array($data)) {
-                return 0;
-            }
-            //logs_write_cli($body, __LINE__);
-            $flag = isset($data['refundId']) ? 'refund' : 'pay';
-
-            if ($flag == 'refund') {
-                //退款
-                $main = $this->orderModel->where('PAYMENT_ID', $data['orderId'])->find();
-                if (!$main) {
-                    return 0;
-                }
-                if ($main['STATE'] != 'REFUND') {
-                    return 0;
-                }
-                $rs = $main->save([
-                    'STATE' => $data['tradeState'] == 'SUCCESS' ? 'REFUND_SUCCESS' : 'REFUND_FAIL',
-                    'REFUND_ID' => $data['refundId'] ?? ''
-                ]);
-            } else {
-                //支付
-                $main = $this->orderModel->where('ORDER_NO', $data['body'])->find();
-                if (!$main) {
-                    return 0;
-                }
-                if ($main['STATE'] != 'WAIT_PAY') {
-                    return 0;
-                }
-                $rs = $this->orderModel->where('ORDER_NO', $data['body'])->save([
-                    'STATE' => $data['tradeState'] == 'SUCCESS' ? 'PAY_SUCCESS' : 'PAY_FAIL',
-                    'PAYMENT_ID' => $data['orderId'] ?? ''
-                ]);
-            }
-            if ($rs === false) {
-                return 1;
-            }
-        } catch (Exception $e) {
+        $this->data = json_decode($this->body, true);
+        if (!is_array($this->data)) {
             return 0;
         }
 
+        logs_write_cli($this->body, __LINE__);
+        $flag = isset($this->data['refundId']) ? 'refund' : 'pay';
+
+        if ($flag == 'refund') {
+            //退款
+            $this->main = $this->orderModel->where('PAYMENT_ID', $this->data['orderId'])->find();
+            if (!$this->main) {
+                return 0;
+            }
+            if ($this->main['STATE'] != 'REFUND') {
+                return 0;
+            }
+            $rs = $this->main->save([
+                'STATE' => $this->main['tradeState'] == 'SUCCESS' ? 'REFUND_SUCCESS' : 'REFUND_FAIL',
+                'REFUND_ID' => $this->main['refundId'] ?? ''
+            ]);
+        } else {
+            //支付
+            $this->main = $this->orderModel->where('ORDER_NO', $this->data['body'])->find();
+            if (!$this->main) {
+                return 0;
+            }
+            if ($this->main['STATE'] != 'WAIT_PAY') {
+                return 0;
+            }
+            $rs = $this->main->save([
+                'STATE' => $this->data['tradeState'] == 'SUCCESS' ? 'PAY_SUCCESS' : 'PAY_FAIL',
+                'PAYMENT_ID' => $this->data['orderId'] ?? ''
+            ]);
+        }
+
+        if ($rs === false) {
+            return 1;
+        }
+
+
         return 0;
     }
+
 }
