@@ -80,7 +80,7 @@ class OrderMq
     }
     public function consumer2()
     {
-        $this->con->registerCallback(function($consumer, $messageExt){
+        $this->con->registerCallbackOrderly(function($consumer, $messageExt){
             if (!empty($messageExt->getMessageBody())) {
                 //echo $messageExt->getMessageBody();
                 //return 0;
