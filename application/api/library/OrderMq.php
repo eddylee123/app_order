@@ -122,8 +122,8 @@ class OrderMq
                 return 0;
             }
             $rs = $this->main->save([
-                'STATE' => $this->main['tradeState'] == 'SUCCESS' ? 'REFUND_SUCCESS' : 'REFUND_FAIL',
-                'REFUND_ID' => $this->main['refundId'] ?? ''
+                'STATE' => $this->data['tradeState'] == 'SUCCESS' ? 'REFUND_SUCCESS' : 'REFUND_FAIL',
+                'REFUND_ID' => $this->data['refundId'] ?? ''
             ]);
         } else {
             //支付
