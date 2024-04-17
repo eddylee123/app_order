@@ -1,6 +1,6 @@
 <?php
 // 注册协议
-define('GW_REGISTER_PROTOCOL','127.0.0.1:1284');
+define('GW_REGISTER_PROTOCOL','0.0.0.0:1284');
 // 注册地址
 define('GW_REGISTER_ADDRESS','127.0.0.1:1284');
 // 网关地址
