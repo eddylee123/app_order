@@ -260,8 +260,9 @@ class OrderService extends BaseService
         if ($main['STATE'] != 'PAY_SUCCESS') {
             app_exception('订单未支付成功，无法退款');
         }
-        if ($main['CHECK'] == 1) {
-            app_exception('订单已核销，无法退款');
+        if ($main['CHECK'] != 0) {
+            $main['CHECK'] == 1 && app_exception('订单已核销，无法退款');
+            $main['CHECK'] == 2 && app_exception('订单核销超时，无法退款');
         }
         if ($param['REFUND_AMT'] > $main['PAY_AMT']) {
             app_exception('退款金额异常');
