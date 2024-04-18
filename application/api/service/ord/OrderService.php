@@ -260,8 +260,8 @@ class OrderService extends BaseService
         if ($main['STATE'] != 'PAY_SUCCESS') {
             app_exception('订单未支付成功，无法退款');
         }
-        if ($main['CHECK'] != 0) {
-            app_exception('订单核销异常，无法退款');
+        if ($main['CHECK'] == 1) {
+            app_exception('订单已核销，无法退款');
         }
         if ($param['REFUND_AMT'] > $main['PAY_AMT']) {
             app_exception('退款金额异常');
@@ -366,7 +366,7 @@ class OrderService extends BaseService
             app_exception('订单信息异常');
         }
         if ($main['STATE'] != 'PAY_SUCCESS') {
-            app_exception('订单未支付成功，无法核销');
+            app_exception('订单状态异常，无法核销');
         }
         if ($main['CHECK'] != 0) {
             $main['CHECK'] == 1 && app_exception('订单已核销');
@@ -382,7 +382,10 @@ class OrderService extends BaseService
         $timestamp = time();
         if (strtotime($startTime) <= $timestamp && $timestamp <= strtotime($endTime)) {
             //核销
-            $rs0 = $main->save(['CHECK'=>1,'CHECK_DATE'=>date('Y-m-d H:i:s')]);
+            $rs0 = $main->save([
+                'CHECK'=>1,
+                'CHECK_DATE'=>date('Y-m-d H:i:s')
+            ]);
             if ($rs0 === false) {
                 app_exception('核销失败，请稍后再试');
             }

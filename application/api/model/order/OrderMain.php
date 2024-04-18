@@ -33,6 +33,8 @@ class OrderMain Extends Model
         'REFUND' => '退款中',
         'REFUND_SUCCESS' => '退款成功',
         'REFUND_FAIL' => '退款失败',
+        'CONFIRM' => '已确认',
+        'EXPIRED' => '已过期',
     ];
 
     public function getStateTextAttr($value, $data)
