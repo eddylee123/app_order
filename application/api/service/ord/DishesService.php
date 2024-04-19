@@ -2,6 +2,7 @@
 namespace app\api\service\ord;
 
 use app\api\model\ord\Category;
+use app\api\model\ord\Config;
 use app\api\model\ord\Dishes;
 use app\api\model\ord\DishesFile;
 use app\api\model\ord\File;
@@ -15,6 +16,7 @@ class DishesService extends BaseService
     protected $fileModel;
     protected $cateModel;
     protected $dishesFileModel;
+    protected $configModel;
 
     public function __construct()
     {
@@ -22,6 +24,7 @@ class DishesService extends BaseService
         $this->fileModel = new File();
         $this->cateModel = new Category();
         $this->dishesFileModel = new DishesFile();
+        $this->configModel = new Config();
     }
 
     public function lists(string $orgId, array $param, $app=false)
@@ -30,6 +33,13 @@ class DishesService extends BaseService
 
         if ($app) {
             $object->where("STATUS", 'ON');
+            //单日点餐饱和数
+            $conf = $this->configModel->getConf('', 'PAY_CONFIG');
+            $dayMaxDish = $conf['DAY_MAX_DISH'] ?? 6;
+            $maxDish = OrderService::instance()->getMaxDish();
+            if (count($maxDish) == $dayMaxDish ) {
+                $object->whereIn('ID', $maxDish);
+            }
         }
         if (!empty($orgId)) {
             $object->where("ORG_CODE", $orgId);

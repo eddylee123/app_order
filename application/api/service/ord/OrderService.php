@@ -141,89 +141,102 @@ class OrderService extends BaseService
 
     public function settle(int $userId, array $param)
     {
-        //去重
-//        $exist = $this->mainModel
-//            ->where('USER_ID', $userId)
-//            ->whereIn('STATE', ['WAIT_PAY','PAYING'])
-//            ->value('ID');
-//        if ($exist) {
-//            app_exception('当前存在未支付订单，请勿重复提交');
-//        }
-        $dishIds = array_column($param['DISH'],'ID');
-        $dish = $this->dishesModel
-            ->whereIn('ID', $dishIds)
-            ->column('*', 'ID');
-
-        $detail = [];
-        foreach ($param['DISH'] as $v) {
-            if (empty($dish[$v['ID']])) {
-                app_exception('菜单信息异常');
-            }
-            $dishOrd = $dish[$v['ID']];
-            //库存控制
-            if ($v['NUM'] < $dishOrd['MIN_NUM']) {
-                app_exception('点餐数量过少');
-            }
-            $ordS = date('Y-m-d 00:00:00');
-            $ordE = date('Y-m-d 23:59:59');
-            $numAll = $this->mainModel
-                ->alias('om')
-                ->join('ord_order_detail od','od.ORD_ID=om.ID')
-                ->where('od.DISH_ID', $dishOrd['ID'])
-                ->whereNotIn('om.STATE', ['PAY_FAIL'])
-                ->whereBetween('om.CREATE_DATE', [$ordS, $ordE])
-                ->sum('od.NUM');
-            if (($numAll + $v['NUM']) > $dishOrd['STOCK_PER_DAY']) {
-                app_exception('商品库存不足');
+        try {
+            $conf = $this->configModel->getConf('', 'POINT_TIME');
+            $endPoint = date('Y-m-d') . ' ' . $conf['ORDER_OFF'];
+            if (time() > strtotime($endPoint)) {
+                app_exception('今天已经打烊了，请明天再来');
             }
 
-            $detail[] = [
-                'DISH_ID' => $dishOrd['ID'],
-                'UNIT_PRICE' => $dishOrd['PRICE'],
-                'DISH_NAME' => $dishOrd['NAME'],
-                'NUM' => $v['NUM'],
-                'TOTAL_AMT' => $dishOrd['PRICE'] * $v['NUM']
+            $dishIds = array_column($param['DISH'], 'ID');
+            $dish = $this->dishesModel
+                ->whereIn('ID', $dishIds)
+                ->column('*', 'ID');
+            //单日点餐饱和数
+            $conf = $this->configModel->getConf('', 'PAY_CONFIG');
+            $dayMaxDish = $conf['DAY_MAX_DISH'] ?? 6;
+            $maxDish = OrderService::instance()->getMaxDish();
+
+            $detail = [];
+            foreach ($param['DISH'] as $v) {
+                //单日点餐饱和数控制
+                if (count($maxDish) == $dayMaxDish ) {
+                    if (!in_array($v['ID'], $maxDish)) {
+                        app_exception('限制菜品，暂无法下单');
+                    }
+                }
+                if (empty($dish[$v['ID']])) {
+                    app_exception('菜单信息异常');
+                }
+                $dishOrd = $dish[$v['ID']];
+                //库存控制
+                if ($v['NUM'] < $dishOrd['MIN_NUM']) {
+                    app_exception('点餐数量过少');
+                }
+                $ordS = date('Y-m-d 00:00:00');
+                $ordE = date('Y-m-d 23:59:59');
+                $numAll = $this->mainModel
+                    ->alias('om')
+                    ->join('ord_order_detail od', 'od.ORD_ID=om.ID')
+                    ->where('od.DISH_ID', $dishOrd['ID'])
+                    ->whereNotIn('om.STATE', ['PAY_FAIL'])
+                    ->whereBetween('om.CREATE_DATE', [$ordS, $ordE])
+                    ->sum('od.NUM');
+                if (($numAll + $v['NUM']) > $dishOrd['STOCK_PER_DAY']) {
+                    app_exception('商品库存不足');
+                }
+
+                $detail[] = [
+                    'DISH_ID' => $dishOrd['ID'],
+                    'UNIT_PRICE' => $dishOrd['PRICE'],
+                    'DISH_NAME' => $dishOrd['NAME'],
+                    'NUM' => $v['NUM'],
+                    'TOTAL_AMT' => $dishOrd['PRICE'] * $v['NUM']
+                ];
+            }
+            //存储结算数据
+            $payAmt = array_sum(array_column($detail, 'TOTAL_AMT'));
+            $time = date("Y-m-d H:i:s");
+            $dish1 = reset($dish);
+            $main = [
+                'ORDER_NO' => get_order_no(),
+                'ORG_CODE' => $dish1['ORG_CODE'],
+                'PLACE_ID' => $dish1['PLACE_ID'],
+                'USER_ID' => $userId,
+                'PAYMENT_ID' => '',
+                'STATE' => 'WAIT_PAY',
+                'PAY_AMT' => $payAmt,
+                'ORDER_AMT' => $payAmt,
+                'MEAL_TYPE' => $param['MEAL_TYPE'],
+                'CODE' => rand_str(32),
+                'CREATE_DATE' => $time,
+                'PAY_DATE' => $time,
+                'MARK_DATE' => date("Y-m-d", strtotime("+1 day"))
             ];
-        }
-        //存储结算数据
-        $payAmt = array_sum(array_column($detail, 'TOTAL_AMT'));
-        $time = date("Y-m-d H:i:s");
-        $dish1= reset($dish);
-        $main = [
-            'ORDER_NO' => get_order_no(),
-            'ORG_CODE' => $dish1['ORG_CODE'],
-            'PLACE_ID' => $dish1['PLACE_ID'],
-            'USER_ID' => $userId,
-            'PAYMENT_ID' => '',
-            'STATE' => 'WAIT_PAY',
-            'PAY_AMT' => $payAmt,
-            'ORDER_AMT' => $payAmt,
-            'MEAL_TYPE' => $param['MEAL_TYPE'],
-            'CODE' => rand_str(32),
-            'CREATE_DATE' => $time,
-            'PAY_DATE' => $time,
-            'MARK_DATE' => date("Y-m-d", strtotime("+1 day"))
-        ];
 
-        $ordId = $this->mainModel->insertGetId($main);
-        if (!$ordId) {
-            app_exception('结算失败，请稍后再试');
-        }
+            $ordId = $this->mainModel->insertGetId($main);
+            if (!$ordId) {
+                app_exception('结算失败，请稍后再试');
+            }
 
-        foreach ($detail as &$val) {
-            $val['ORD_ID'] = $ordId;
-        }
+            foreach ($detail as &$val) {
+                $val['ORD_ID'] = $ordId;
+            }
 
-        $rs0 = $this->detailModel->saveAll($detail);
-        if (!$rs0) {
-            app_exception('系统异常，请稍后再试');
+            $rs0 = $this->detailModel->saveAll($detail);
+            if (!$rs0) {
+                app_exception('系统异常，请稍后再试');
+            }
+            return [
+                'ORDER_ID' => $ordId,
+                'ORDER_NO' => $main['ORDER_NO'],
+                'PAY_AMT' => $main['PAY_AMT'],
+                'ORDER_AMT' => $main['ORDER_AMT'],
+            ];
+        } catch (Exception $e) {
+            app_exception($e->getMessage());
+            return false;
         }
-        return [
-            'ORDER_ID' => $ordId,
-            'ORDER_NO' => $main['ORDER_NO'],
-            'PAY_AMT' => $main['PAY_AMT'],
-            'ORDER_AMT' => $main['ORDER_AMT'],
-        ];
     }
 
     public function pay(array $param)
@@ -248,32 +261,41 @@ class OrderService extends BaseService
         return $this->payHandle($main, $param);
     }
 
-    public function refund(array $param)
+    public function refund(array $param, $app=false)
     {
-        $main = $this->mainModel->find($param['ORDER_ID']);
-        if (empty($main)) {
-            app_exception('订单信息异常');
-        }
-        if ($main['STATE'] == 'REFUND') {
-            app_exception('订单退款中，请勿重复操作');
-        }
-        if ($main['STATE'] != 'PAY_SUCCESS') {
-            app_exception('订单未支付成功，无法退款');
-        }
-        if ($main['CHECK'] != 0) {
-            $main['CHECK'] == 1 && app_exception('订单已核销，无法退款');
-            $main['CHECK'] == 2 && app_exception('订单核销超时，无法退款');
-        }
-        if ($param['REFUND_AMT'] > $main['PAY_AMT']) {
-            app_exception('退款金额异常');
-        }
-        $data = [
-            'paymentId' => $main['PAYMENT_ID'],
-            'refundAmt' => $param['REFUND_AMT'],
-            'sourceTag' => OrderPay::refundTag,
-            'refundReason' => $param['REASON'],
-        ];
         try {
+            $main = $this->mainModel->find($param['ORDER_ID']);
+            if ($app) {
+                if (empty($main)) {
+                    app_exception('订单信息异常');
+                }
+                if ($main['STATE'] == 'REFUND') {
+                    app_exception('订单退款中，请勿重复操作');
+                }
+                if ($main['STATE'] != 'PAY_SUCCESS') {
+                    app_exception('订单未支付成功，无法退款');
+                }
+                if ($main['CHECK'] != 0) {
+                    $main['CHECK'] == 1 && app_exception('订单已核销，无法退款');
+                    $main['CHECK'] == 2 && app_exception('订单核销超时，无法退款');
+                }
+
+                $conf = $this->configModel->getConf('', 'POINT_TIME');
+                $endPoint = date('Y-m-d') . ' ' . $conf['CANCEL_OFF'];
+                if (time() > strtotime($endPoint)) {
+                    app_exception('已超过退款时间了');
+                }
+            }
+
+            if ($param['REFUND_AMT'] > $main['PAY_AMT']) {
+                app_exception('退款金额异常');
+            }
+            $data = [
+                'paymentId' => $main['PAYMENT_ID'],
+                'refundAmt' => $param['REFUND_AMT'],
+                'sourceTag' => OrderPay::refundTag,
+                'refundReason' => $param['REASON'],
+            ];
             $resp = OrderPay::refund($data);
             if ($resp['success'] != true) {
                 app_exception($resp['errorMessage']);
@@ -310,32 +332,32 @@ class OrderService extends BaseService
 
     protected function payHandle(&$main,array $param)
     {
-        if ($main['STATE'] != 'WAIT_PAY') {
-            app_exception('系统异常，暂无待支付订单');
-        }
-        //支付超时判断
-        $conf = $this->configModel->getConf('', 'PAY_CONFIG');
-        $payConf = [
-            "PAY_END_SEC" => $conf['PAY_END_SEC'] ?? 600,
-            "REFUND_END_SEC" => $conf['REFUND_END_SEC'] ?? 600
-        ];
-        if ((time() - strtotime($main['CREATE_DATE'])) > $payConf['PAY_END_SEC']) {
-            app_exception('订单支付超时，请重新下单');
-        }
-        //用户信息
-        $data = [
-            'openId' => $param['openId'],
-            'title' => 'order',
-            'body' => $main['ORDER_NO'],
-            'payAmt' => $main['PAY_AMT'],
-            'ipAddress' => $param['IP'],
-            'expireSeconds' => $payConf['PAY_END_SEC'],
-            'channel' => $param['CHANNEL'],
-            'tradeType' => $param['TRADE_TYPE'],
-            'sourceTag' => OrderPay::payTag,
-        ];
-
         try {
+            if ($main['STATE'] != 'WAIT_PAY') {
+                app_exception('系统异常，暂无待支付订单');
+            }
+            //支付超时判断
+            $conf = $this->configModel->getConf('', 'PAY_CONFIG');
+            $payConf = [
+                "PAY_END_SEC" => $conf['PAY_END_SEC'] ?? 600,
+                "REFUND_END_SEC" => $conf['REFUND_END_SEC'] ?? 600
+            ];
+            if ((time() - strtotime($main['CREATE_DATE'])) > $payConf['PAY_END_SEC']) {
+                app_exception('订单支付超时，请重新下单');
+            }
+            //用户信息
+            $data = [
+                'openId' => $param['openId'],
+                'title' => 'order',
+                'body' => $main['ORDER_NO'],
+                'payAmt' => $main['PAY_AMT'],
+                'ipAddress' => $param['IP'],
+                'expireSeconds' => $payConf['PAY_END_SEC'],
+                'channel' => $param['CHANNEL'],
+                'tradeType' => $param['TRADE_TYPE'],
+                'sourceTag' => OrderPay::payTag,
+            ];
+
             $resp = OrderPay::pay($data);
             if ($resp['success'] != true) {
                 app_exception('支付请求失败');
@@ -394,6 +416,26 @@ class OrderService extends BaseService
             return $orderNo;
         }
         app_exception('未在核销时间内，暂无法核销');
+        return true;
+    }
+
+    /**
+     * 单日点餐饱和数
+     * @return array|bool|string
+     * DateTime: 2024-04-19 15:28
+     */
+    public function getMaxDish()
+    {
+        $ordS = date('Y-m-d 00:00:00');
+        $ordE = date('Y-m-d 23:59:59');
+        $conf = $this->configModel->getConf('', 'PAY_CONFIG');
+        $maxDish = $conf['DAY_MAX_DISH'] ?? 6;
+        return $this->detailModel
+            ->whereBetween('CREATE_DATE', [$ordS, $ordE])
+            ->distinct('DISH_ID')
+            ->limit(0, $maxDish)
+            ->order('id', 'asc')
+            ->column('DISH_ID');
     }
 
 }

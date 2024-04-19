@@ -122,8 +122,11 @@ class Order extends BaseController
         if (!$result) {
             app_exception($validate->getError());
         }
-
-        $rs = OrderService::instance()->refund($this->Data);
+        if ($this->IsApp) {
+            $rs = OrderService::instance()->refund($this->Data, true);
+        } else {
+            $rs = OrderService::instance()->refund($this->Data);
+        }
 
         app_response(200, ['SUCCESS'=>$rs]);
     }
