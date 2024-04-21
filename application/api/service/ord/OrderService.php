@@ -183,7 +183,7 @@ class OrderService extends BaseService
                     ->whereBetween('om.CREATE_DATE', [$ordS, $ordE])
                     ->sum('od.NUM');
                 if (($numAll + $v['NUM']) > $dishOrd['STOCK_PER_DAY']) {
-                    app_exception('商品库存不足');
+                    app_exception($dishOrd['NAME'].'库存不足');
                 }
 
                 $detail[] = [
