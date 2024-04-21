@@ -171,7 +171,7 @@ class OrderService extends BaseService
                 $dishOrd = $dish[$v['ID']];
                 //库存控制
                 if ($v['NUM'] < $dishOrd['MIN_NUM']) {
-                    app_exception('点餐数量过少');
+                    app_exception(sprintf('菜品%s最小点单数为%d份',$dishOrd['NAME'], $dishOrd['MIN_NUM']));
                 }
                 $ordS = date('Y-m-d 00:00:00');
                 $ordE = date('Y-m-d 23:59:59');
@@ -179,7 +179,7 @@ class OrderService extends BaseService
                     ->alias('om')
                     ->join('ord_order_detail od', 'od.ORD_ID=om.ID')
                     ->where('od.DISH_ID', $dishOrd['ID'])
-                    ->whereNotIn('om.STATE', ['PAY_FAIL'])
+                    ->whereNotIn('om.STATE', ['PAY_FAIL','REFUND_SUCCESS'])
                     ->whereBetween('om.CREATE_DATE', [$ordS, $ordE])
                     ->sum('od.NUM');
                 if (($numAll + $v['NUM']) > $dishOrd['STOCK_PER_DAY']) {
