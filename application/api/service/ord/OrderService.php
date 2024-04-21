@@ -155,7 +155,7 @@ class OrderService extends BaseService
             //单日点餐饱和数
             $conf = $this->configModel->getConf('', 'PAY_CONFIG');
             $dayMaxDish = $conf['DAY_MAX_DISH'] ?? 6;
-            $maxDish = OrderService::instance()->getMaxDish();
+            $maxDish = $this->getMaxDish();
 
             $detail = [];
             foreach ($param['DISH'] as $v) {
@@ -171,7 +171,7 @@ class OrderService extends BaseService
                 $dishOrd = $dish[$v['ID']];
                 //库存控制
                 if ($v['NUM'] < $dishOrd['MIN_NUM']) {
-                    app_exception(sprintf('菜品%s最小点单数为%d份',$dishOrd['NAME'], $dishOrd['MIN_NUM']));
+                    app_exception(sprintf('%s最小下单数为%d份',$dishOrd['NAME'], $dishOrd['MIN_NUM']));
                 }
                 $ordS = date('Y-m-d 00:00:00');
                 $ordE = date('Y-m-d 23:59:59');
@@ -430,12 +430,13 @@ class OrderService extends BaseService
         $ordE = date('Y-m-d 23:59:59');
         $conf = $this->configModel->getConf('', 'PAY_CONFIG');
         $maxDish = $conf['DAY_MAX_DISH'] ?? 6;
-        return $this->detailModel
-            ->whereBetween('CREATE_DATE', [$ordS, $ordE])
-            ->distinct('DISH_ID')
-            ->limit(0, $maxDish)
-            ->order('id', 'asc')
-            ->column('DISH_ID');
+
+        $sql = "SELECT DISTINCT `DISH_ID` FROM (
+            SELECT `DISH_ID` FROM `ord_order_detail` 
+            WHERE  `CREATE_DATE` BETWEEN '{$ordS}' AND '{$ordE}' 
+            ORDER BY `id` ASC
+            ) a LIMIT 0,{$maxDish}";
+        return $this->detailModel->query($sql);
     }
 
 }
