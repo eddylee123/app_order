@@ -280,8 +280,9 @@ class OrderService extends BaseService
                     $main['CHECK'] == 2 && app_exception('订单核销超时，无法退款');
                 }
 
+                $payDay = substr($main['PAY_DATE'], 0, strpos($main['PAY_DATE'], ' '));
                 $conf = $this->configModel->getConf('', 'POINT_TIME');
-                $endPoint = date('Y-m-d') . ' ' . $conf['CANCEL_OFF'];
+                $endPoint = $payDay.' '.$conf['CANCEL_OFF'];
                 if (time() > strtotime($endPoint)) {
                     app_exception('已超过退款时间了');
                 }
