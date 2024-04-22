@@ -345,10 +345,11 @@ class OrderService extends BaseService
             if ((time() - strtotime($main['CREATE_DATE'])) > $payConf['PAY_END_SEC']) {
                 app_exception('订单支付超时，请重新下单');
             }
-            //用户信息
+            //点餐信息
+            $dish = $this->detailModel->where('ORD_ID', $main['ID'])->column('DISH_NAME');
             $data = [
                 'openId' => $param['openId'],
-                'title' => 'order',
+                'title' => implode(',', $dish),
                 'body' => $main['ORDER_NO'],
                 'payAmt' => $main['PAY_AMT'],
                 'ipAddress' => $param['IP'],
