@@ -164,4 +164,15 @@ class Order extends BaseController
 
         app_response(200, $rs);
     }
+
+    /**
+     * 导出
+     * DateTime: 2024-05-08 15:56
+     */
+    public function export()
+    {
+        $rs = OrderService::instance()->export($this->OrgId, $this->Data);
+
+        app_response(200, $rs);
+    }
 }

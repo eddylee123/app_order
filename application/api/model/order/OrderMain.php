@@ -37,6 +37,12 @@ class OrderMain Extends Model
         'EXPIRED' => '已过期',
     ];
 
+    public $checkMap = [
+        '0' => '未核销',
+        '1' => '已核销',
+        '2' => '核销超时'
+    ];
+
     public function getStateTextAttr($value, $data)
     {
         return $this->stateMap[$data['STATE']] ?? '';
