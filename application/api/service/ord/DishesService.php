@@ -38,7 +38,7 @@ class DishesService extends BaseService
             $dayMaxDish = $conf['DAY_MAX_DISH'] ?? 6;
             $maxDish = OrderService::instance()->getMaxDish();
             if (count($maxDish) == $dayMaxDish ) {
-                $object->whereIn('ID', $maxDish);
+                $object->whereIn('ID', array_column($maxDish,'DISH_ID'));
             }
         }
         if (!empty($orgId)) {
