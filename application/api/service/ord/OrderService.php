@@ -12,6 +12,7 @@ use app\api\model\ord\File;
 use app\api\model\ord\User;
 use app\api\model\order\OrderDetail;
 use app\api\model\order\OrderMain;
+use app\api\service\api\CommonService;
 use app\api\service\BaseService;
 use think\Db;
 use think\Exception;
@@ -434,11 +435,81 @@ class OrderService extends BaseService
         $maxDish = $conf['DAY_MAX_DISH'] ?? 6;
 
         $sql = "SELECT DISTINCT `DISH_ID` FROM (
-            SELECT `DISH_ID` FROM `ord_order_detail` 
-            WHERE  `CREATE_DATE` BETWEEN '{$ordS}' AND '{$ordE}' 
-            ORDER BY `id` ASC
+            SELECT od.`DISH_ID` FROM `ord_order_detail` od 
+            INNER JOIN `ord_order_main` om 
+            ON om.ID=od.ORD_ID 
+            WHERE  om.`CREATE_DATE` BETWEEN '{$ordS}' AND '{$ordE}' 
+            AND om.STATE NOT IN ('PAY_FAIL')
+            ORDER BY od.`DISH_ID` ASC
             ) a LIMIT 0,{$maxDish}";
         return $this->detailModel->query($sql);
+    }
+
+    public function export(string $orgId, array $param)
+    {
+        $object = $this->detailModel
+            ->alias('od')
+            ->join('ord_order_main om', 'om.ID=od.ORD_ID')
+            ->field('od.ORD_ID,od.DISH_ID,od.UNIT_PRICE,od.NUM,od.TOTAL_AMT,od.DISH_NAME,om.ORDER_NO,om.USER_ID,
+            om.PAYMENT_ID,om.REFUND_ID,om.STATE,om.PAY_AMT,om.REMARK,om.MEAL_TYPE,om.CHECK,om.PAY_DATE,om.REFUND_DATE,om.CHECK_DATE');
+
+        if (!empty($orgId)) {
+            $object->where("om.ORG_CODE", $orgId);
+        }
+        if (!empty($param['PLACE_ID'])) {
+            $object->where("om.PLACE_ID", $param['PLACE_ID']);
+        }
+        if (!empty($param['ORDER_NO'])) {
+            $object->where("om.ORDER_NO", 'like', $param['ORDER_NO']."%");
+        }
+        if (!empty($param['STATE'])) {
+            $object->where("om.STATE", $param['STATE']);
+        }
+        if (!empty($param['START_TIME'])) {
+            $object->where("om.CREATE_DATE", '>=', $param['START_TIME']);
+        }
+        if (!empty($param['END_TIME'])) {
+            $object->where("om.CREATE_DATE", '<=', $param['END_TIME']);
+        }
+
+        $list = $object
+            ->order('CREATE_DATE', 'asc')
+            ->select();
+        $list = collection($list)->toArray();
+
+        $userIds = array_column($list, 'USER_ID');
+        $userList = $this->userModel->whereIn('ID',$userIds)->column('EMP_ID,NAME','ID');
+        $mealType = $this->configModel->getConf('', 'MEAL_TYPE');
+        $stateMap = $this->mainModel->stateMap;
+        $checkMap = $this->mainModel->checkMap;
+
+        $data = [];
+        foreach ($list as $k=>$v) {
+            $userInfo = $userList[$v['USER_ID']] ?? [];
+            $data[] = [
+                'DISH_NAME' => $v['DISH_NAME'],
+                'NUM' => $v['NUM'],
+                'TOTAL_AMT' => $v['TOTAL_AMT'] / 100,
+                'EMP_ID' => $userInfo['EMP_ID'] ?? '',
+                'NAME' => $userInfo['NAME'] ?? '',
+                'ORDER_NO' => $v['ORDER_NO'],
+                'PAYMENT_ID' => $v['PAYMENT_ID'],
+                'REFUND_ID' => $v['REFUND_ID'],
+                'STATE' => $stateMap[$v['STATE']] ?? '',
+                'PAY_AMT' => $v['PAY_AMT'],
+                'REFUND_AMT' => $v['REFUND_AMT'],
+                'REMARK' => $v['REMARK'],
+                'MEAL_TYPE' => $mealType[$v['MEAL_TYPE']] ?? '',
+                'CHECK' => $checkMap[$v['CHECK']] ?? '',
+                'PAY_DATE' => $v['PAY_DATE'],
+                'REFUND_DATE' => $v['REFUND_DATE'],
+                'CHECK_DATE' => $v['CHECK_DATE'],
+            ];
+
+        }
+        //上传excel
+        $header = ['菜名','数量','总价','工号','姓名','订单号','支付单号','退款单号','状态','支付金额','退款金额','订单备注','餐类','核销状态','支付时间','退款时间','核销时间'];
+        return CommonService::instance()->putExcel($header, $data, 'ord');
     }
 
 }
