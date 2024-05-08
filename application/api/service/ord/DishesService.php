@@ -32,11 +32,14 @@ class DishesService extends BaseService
         $object = $this->dishesModel;
 
         if ($app) {
+            if (empty($param['MEAL_TYPE'])) {
+                app_exception('用餐类型不能为空');
+            }
             $object->where("STATUS", 'ON');
             //单日点餐饱和数
             $conf = $this->configModel->getConf('', 'PAY_CONFIG');
             $dayMaxDish = $conf['DAY_MAX_DISH'] ?? 6;
-            $maxDish = OrderService::instance()->getMaxDish();
+            $maxDish = OrderService::instance()->getMaxDish($param['MEAL_TYPE']);
             if (count($maxDish) == $dayMaxDish ) {
                 $object->whereIn('ID', array_column($maxDish,'DISH_ID'));
             }

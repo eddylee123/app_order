@@ -424,10 +424,11 @@ class OrderService extends BaseService
 
     /**
      * 单日点餐饱和数
-     * @return array|bool|string
-     * DateTime: 2024-04-19 15:28
+     * @param string $mealType
+     * @return mixed
+     * DateTime: 2024-05-08 15:41
      */
-    public function getMaxDish()
+    public function getMaxDish(string $mealType)
     {
         $ordS = date('Y-m-d 00:00:00');
         $ordE = date('Y-m-d 23:59:59');
@@ -439,19 +440,27 @@ class OrderService extends BaseService
             INNER JOIN `ord_order_main` om 
             ON om.ID=od.ORD_ID 
             WHERE  om.`CREATE_DATE` BETWEEN '{$ordS}' AND '{$ordE}' 
-            AND om.STATE NOT IN ('PAY_FAIL')
+            AND om.STATE NOT IN ('PAY_FAIL') 
+            AND om.MEAL_TYPE = '{$mealType}' 
             ORDER BY od.`DISH_ID` ASC
             ) a LIMIT 0,{$maxDish}";
         return $this->detailModel->query($sql);
     }
 
+    /**
+     * 订单导出
+     * @param string $orgId
+     * @param array $param
+     * @return mixed
+     * DateTime: 2024-05-08 15:54
+     */
     public function export(string $orgId, array $param)
     {
         $object = $this->detailModel
             ->alias('od')
             ->join('ord_order_main om', 'om.ID=od.ORD_ID')
             ->field('od.ORD_ID,od.DISH_ID,od.UNIT_PRICE,od.NUM,od.TOTAL_AMT,od.DISH_NAME,om.ORDER_NO,om.USER_ID,
-            om.PAYMENT_ID,om.REFUND_ID,om.STATE,om.PAY_AMT,om.REMARK,om.MEAL_TYPE,om.CHECK,om.PAY_DATE,om.REFUND_DATE,om.CHECK_DATE');
+            om.PAYMENT_ID,om.REFUND_ID,om.STATE,om.PAY_AMT,om.REFUND_AMT,om.REMARK,om.MEAL_TYPE,om.CHECK,om.PAY_DATE,om.REFUND_DATE,om.CHECK_DATE');
 
         if (!empty($orgId)) {
             $object->where("om.ORG_CODE", $orgId);
@@ -473,7 +482,7 @@ class OrderService extends BaseService
         }
 
         $list = $object
-            ->order('CREATE_DATE', 'asc')
+            ->order('om.CREATE_DATE', 'asc')
             ->select();
         $list = collection($list)->toArray();
 
