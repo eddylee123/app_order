@@ -36,7 +36,7 @@ class CommonService extends BaseService
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $filePath = ROOT_PATH.'public'.DS.'uploads'.DS.$filename.date('ymdhis').'.xlsx';
-        $writer->save($filePath);var_dump($filePath);exit();
+        $writer->save($filePath);
 
         //上传到oss
         return Oss::upload($filename.'.xlsx', $filePath);
