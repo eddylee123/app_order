@@ -55,6 +55,7 @@ class ComposerStaticInit47906e222cb93d02a6c441f4d59ebb24
         ),
         'M' => 
         array (
+            'MyCLabs\\Enum\\' => 13,
             'Matrix\\' => 7,
         ),
         'J' => 
@@ -143,6 +144,10 @@ class ComposerStaticInit47906e222cb93d02a6c441f4d59ebb24
         'Overtrue\\Pinyin\\' => 
         array (
             0 => __DIR__ . '/..' . '/overtrue/pinyin/src',
+        ),
+        'MyCLabs\\Enum\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/myclabs/php-enum/src',
         ),
         'Matrix\\' => 
         array (
