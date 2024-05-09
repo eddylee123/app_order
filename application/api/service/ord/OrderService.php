@@ -58,10 +58,10 @@ class OrderService extends BaseService
             $object->where("STATE", $param['STATE']);
         }
         if (!empty($param['START_TIME'])) {
-            $object->where("CREATE_DATE", '>=', $param['START_TIME']);
+            $object->where("MARK_DATE", '>=', $param['START_TIME']);
         }
         if (!empty($param['END_TIME'])) {
-            $object->where("CREATE_DATE", '<=', $param['END_TIME']);
+            $object->where("MARK_DATE", '<=', $param['END_TIME']);
         }
 
         $list = $object
@@ -462,8 +462,8 @@ class OrderService extends BaseService
         $object = $this->detailModel
             ->alias('od')
             ->join('ord_order_main om', 'om.ID=od.ORD_ID')
-            ->field('od.ORD_ID,od.DISH_ID,od.UNIT_PRICE,od.NUM,od.TOTAL_AMT,od.DISH_NAME,om.ORDER_NO,om.USER_ID,
-            om.PAYMENT_ID,om.REFUND_ID,om.STATE,om.PAY_AMT,om.REFUND_AMT,om.REMARK,om.MEAL_TYPE,om.CHECK,om.PAY_DATE,om.REFUND_DATE,om.CHECK_DATE');
+            ->field('od.ORD_ID,od.DISH_ID,od.UNIT_PRICE,od.NUM,od.TOTAL_AMT,od.DISH_NAME,om.ORDER_NO,om.USER_ID,om.PAYMENT_ID,om.REFUND_ID,
+            om.STATE,om.PAY_AMT,om.REFUND_AMT,om.REMARK,om.MEAL_TYPE,om.CHECK,om.PAY_DATE,om.REFUND_DATE,om.CHECK_DATE,om.MARK_DATE');
 
         if (!empty($orgId)) {
             $object->where("om.ORG_CODE", $orgId);
@@ -478,10 +478,10 @@ class OrderService extends BaseService
             $object->where("om.STATE", $param['STATE']);
         }
         if (!empty($param['START_TIME'])) {
-            $object->where("om.CREATE_DATE", '>=', $param['START_TIME']);
+            $object->where("om.MARK_DATE", '>=', $param['START_TIME']);
         }
         if (!empty($param['END_TIME'])) {
-            $object->where("om.CREATE_DATE", '<=', $param['END_TIME']);
+            $object->where("om.MARK_DATE", '<=', $param['END_TIME']);
         }
 
         $list = $object
@@ -490,7 +490,7 @@ class OrderService extends BaseService
         $list = collection($list)->toArray();
 
         $userIds = array_column($list, 'USER_ID');
-        $userList = $this->userModel->whereIn('ID',$userIds)->column('EMP_ID,NAME','ID');
+        $userList = $this->userModel->whereIn('ID',$userIds)->column('EMP_ID,NAME,MOBILE','ID');
         $mealType = $this->configModel->getConf('', 'MEAL_TYPE');
         $stateMap = $this->mainModel->stateMap;
         $checkMap = $this->mainModel->checkMap;
@@ -504,13 +504,15 @@ class OrderService extends BaseService
                 'TOTAL_AMT' => $v['TOTAL_AMT'] / 100,
                 'EMP_ID' => $userInfo['EMP_ID'] ?? '',
                 'NAME' => $userInfo['NAME'] ?? '',
+                'MOBILE' => $userInfo['MOBILE'] ?? '',
                 'ORDER_NO' => $v['ORDER_NO'],
                 'PAYMENT_ID' => $v['PAYMENT_ID'],
                 'REFUND_ID' => $v['REFUND_ID'],
                 'STATE' => $stateMap[$v['STATE']] ?? '',
-                'PAY_AMT' => $v['PAY_AMT'],
-                'REFUND_AMT' => $v['REFUND_AMT'],
+                'PAY_AMT' => !empty($v['PAY_AMT']) ? $v['PAY_AMT'] / 100 : 0,
+                'REFUND_AMT' => !empty($v['REFUND_AMT']) ? $v['REFUND_AMT'] / 100 : 0,
                 'REMARK' => $v['REMARK'],
+                'MARK_DATE' => $v['MARK_DATE'],
                 'MEAL_TYPE' => $mealType[$v['MEAL_TYPE']] ?? '',
                 'CHECK' => $checkMap[$v['CHECK']] ?? '',
                 'PAY_DATE' => $v['PAY_DATE'],
@@ -520,7 +522,7 @@ class OrderService extends BaseService
 
         }
         //上传excel
-        $header = ['菜名','数量','总价','工号','姓名','订单号','支付单号','退款单号','状态','支付金额','退款金额','订单备注','餐类','核销状态','支付时间','退款时间','核销时间'];
+        $header = ['菜名','数量','总价','工号','姓名','手机号','订单号','支付单号','退款单号','状态','支付金额','退款金额','订单备注','用餐日期','餐类','核销状态','支付时间','退款时间','核销时间'];
         return CommonService::instance()->putExcel($header, $data, 'ord');
     }
 
