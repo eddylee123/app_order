@@ -154,9 +154,12 @@ class OrderService extends BaseService
                 ->whereIn('ID', $dishIds)
                 ->column('*', 'ID');
             //单日点餐饱和数
+            if (empty($param['MEAL_TYPE'])) {
+                app_exception('用餐类型不能为空');
+            }
             $conf = $this->configModel->getConf('', 'PAY_CONFIG');
             $dayMaxDish = $conf['DAY_MAX_DISH'] ?? 6;
-            $maxDish = $this->getMaxDish();
+            $maxDish = $this->getMaxDish($param['MEAL_TYPE']);
 
             $detail = [];
             foreach ($param['DISH'] as $v) {
