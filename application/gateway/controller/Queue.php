@@ -14,13 +14,13 @@ class Queue
     public static function onWorkerStart($worker)
     {
         //订阅队列
-//        (new OrderMq())->consumer();
-
-        $mq = new OrderMq();
-        $mq->consumerInit();
-        Timer::add(3, function () use ($mq) {
-            $mq->consumer2();
-        });
+        if ($worker->id === 0) {
+            $mq = new OrderMq();
+            $mq->consumerInit();
+            Timer::add(3, function () use ($mq) {
+                $mq->consumer2();
+            });
+        }
     }
 
     /**
