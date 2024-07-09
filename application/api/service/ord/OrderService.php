@@ -443,7 +443,7 @@ class OrderService extends BaseService
             INNER JOIN `ord_order_main` om 
             ON om.ID=od.ORD_ID 
             WHERE  om.`CREATE_DATE` BETWEEN '{$ordS}' AND '{$ordE}' 
-            AND om.STATE NOT IN ('PAY_FAIL') 
+            AND om.STATE IN ('PAY_SUCCESS','CONFIRM') 
             AND om.MEAL_TYPE = '{$mealType}' 
             ORDER BY od.`DISH_ID` ASC
             ) a LIMIT 0,{$maxDish}";
