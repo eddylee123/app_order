@@ -869,8 +869,8 @@ function get_day($date1, $date2)
  */
 function curl_request($url, $method = '', $data = '', $header = [], $json=true)
 {
+    logger($data);
     $data_string = json_encode($data);
-    logger($data_string);
 
     $action = curl_init();
     curl_setopt($action, CURLOPT_URL, $url);
