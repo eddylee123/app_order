@@ -870,6 +870,7 @@ function get_day($date1, $date2)
 function curl_request($url, $method = '', $data = '', $header = [], $json=true)
 {
     $data_string = json_encode($data);
+    logger($data_string);
 
     $action = curl_init();
     curl_setopt($action, CURLOPT_URL, $url);
@@ -901,7 +902,7 @@ function curl_request($url, $method = '', $data = '', $header = [], $json=true)
     return $result;
 }
 
-function logs_write_cli($str , $line=__LINE__, $filename='order_cli'){
+function logger($str, $filename='', $line=__LINE__){
     if (empty($str)) {
         return '';
     }
@@ -916,11 +917,11 @@ function logs_write_cli($str , $line=__LINE__, $filename='order_cli'){
     else{
         $str1 = $str;
     }
-    $dir = ROOT_PATH.'/runtime/log_cli/'.date('Ym').'/';
+    $dir = ROOT_PATH.'/runtime/logger/'.date('Ym').'/';
     is_dir($dir) OR mkdir($dir, 0777, true);
     $file = fopen( $dir. $filename . date('d') .'.log', 'a+'); // a模式就是一种追加模式，如果是w模式则会删除之前的内容再添加
-    fwrite($file, date('H:i:s'). ' '. $str1 . ",line$line\r\n");
-    //fwrite($file, $str1 . "\r\n");
+//    fwrite($file, date('H:i:s'). ' '. $str1 . ",line$line\r\n");
+    fwrite($file, $str1 . "\r\n");
     fclose($file);
     unset($file);
 }
