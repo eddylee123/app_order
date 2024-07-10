@@ -352,6 +352,9 @@ class OrderService extends BaseService
             }
             //点餐信息
             $dish = $this->detailModel->where('ORD_ID', $main['ID'])->column('DISH_NAME');
+            if (count($dish) > 2) {
+                $dish = array_slice($dish,0, 2);
+            }
             $data = [
                 'openId' => $param['openId'],
                 'title' => implode(',', $dish),
